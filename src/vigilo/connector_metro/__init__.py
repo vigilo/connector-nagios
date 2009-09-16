@@ -1,1 +1,0 @@
-""" metrology vigilo connector """

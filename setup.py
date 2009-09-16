@@ -2,12 +2,12 @@
 # vim: set fileencoding=utf-8 sw=4 ts=4 et :
 from setuptools import setup
 
-setup(name='vigilo-connector-metro',
+setup(name='vigilo-connector-nagios',
         version='0.1',
-        author='Thomas BURGUIERE',
-        author_email='thomas.burguiere@c-s.fr',
+        author='Serge MOIGNARD',
+        author_email='serge.moignard@c-s.fr',
         url='http://www.projet-vigilo.org/',
-        description='vigilo metrology connector component',
+        description='vigilo metrology connector nagios component',
         license='http://www.gnu.org/licenses/gpl-2.0.html',
         long_description='The vigilo metrology connector component is a connector between:\n'
         +'   - XMPP/PubSub BUS of message\n'
@@ -30,11 +30,11 @@ setup(name='vigilo-connector-metro',
             ],
         packages=[
             'vigilo',
-            'vigilo.connector_metro',
+            'vigilo.connector_nagios',
             ],
         entry_points={
             'console_scripts': [
-                'connector-metro = vigilo.connector_metro.main:daemonize',
+                'connector-nagios = vigilo.connector_nagios.main:daemonize',
                 ],
             },
         package_dir={'': 'src'},

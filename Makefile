@@ -1,4 +1,4 @@
-NAME := connector_metro
+NAME := connector_nagios
 include ../glue/Makefile.common
 all: build
 lint: lint_pylint

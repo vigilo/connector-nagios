@@ -1,5 +1,5 @@
 # vim: set fileencoding=utf-8 sw=4 ts=4 et :
-""" Metrology connector Pubsub client. """
+""" Metrology connector nagios Pubsub client. """
 from __future__ import absolute_import, with_statement
 
 
@@ -16,13 +16,13 @@ _ = translate(__name__)
 
 class ConnectorServiceMaker(object):
     """
-    Creates a service that wraps everything the connector needs.
+    Creates a service that wraps everything the connector nagios needs.
     """
 
     #implements(service.IServiceMaker, IPlugin)
 
     def makeService(self):
-        """ the service that wraps everything the connector needs. """ 
+        """ the service that wraps everything the connector nagios needs. """ 
         from vigilo.connector_metro.nodetorrdtool import NodeToRRDtoolForwarder
         from vigilo.pubsub import NodeOwner, Subscription
         from vigilo.common.conf import settings
