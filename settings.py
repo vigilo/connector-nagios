@@ -22,16 +22,29 @@ LOGGING_LEVELS = {
     }
 
 
-VIGILO_CONNECTOR_DAEMONIZE = True
-VIGILO_CONNECTOR_DAEMONIZE = False
-VIGILO_CONNECTOR_PIDFILE = '/var/lib/vigilo/connector-metro/connector-metro.pid'
-VIGILO_CONNECTOR_XMPP_SERVER_HOST = 'tburguie3'
-VIGILO_CONNECTOR_XMPP_PUBSUB_SERVICE = 'pubsub.tburguie3'
-# Respect the ejabberd namespacing, for now. It will be too restrictive soon.
-VIGILO_CONNECTOR_JID = 'connector-metro@tburguie3'
-VIGILO_CONNECTOR_PASS = 'connector-metro'
 
-VIGILO_CONNECTOR_METRO_TOPIC = '/home/tburguie3/connectorx/BUS'
-VIGILO_MESSAGE_BACKUP_FILE = '/var/lib/vigilo/connector-metro/backup'
-VIGILO_MESSAGE_BACKUP_TABLE_FROMBUS = 'connector_frombus'
-VIGILO_METRO_CONF = '/etc/connector-metro.conf.py'
+#VIGILO_CONNECTOR_DAEMONIZE = True
+VIGILO_CONNECTOR_DAEMONIZE = False
+VIGILO_CONNECTOR_PIDFILE = '/home/smoignar/var/vigilo/connector-nagios/connector-nagios.pid'
+VIGILO_CONNECTOR_XMPP_SERVER_HOST = 'localhost'
+VIGILO_CONNECTOR_XMPP_PUBSUB_SERVICE = 'pubsub.localhost'
+# Respect the ejabberd namespacing, for now. It will be too restrictive soon.
+VIGILO_CONNECTOR_JID = 'user-nagios@localhost'
+VIGILO_CONNECTOR_PASS = 'user-nagios'
+
+# listen on this node (écoute de ce noeud)
+# pas initialisé le connector nagios n'as pas à recevoir du d'info du BUS
+#VIGILO_CONNECTOR_NAGIOS_TOPIC = '/home/smoignar/connector-nagios/BUS'
+# create this node (créer ce noeud)
+VIGILO_CONNECTOR_TOPIC_OWNER = ['/home/localhost/user-nagios/BUS']
+# publish on those node (publier sur ces noeuds)
+VIGILO_CONNECTOR_TOPIC_PUBLISHER = { 
+        'perf': '/home/localhost/user-nagios/BUS',
+        'event': '/home/localhost/user-nagios/BUS',
+        }
+
+
+VIGILO_SOCKETR = '/var/lib/vigilo/connector-nagios/send.sock'
+VIGILO_MESSAGE_BACKUP_FILE = '/var/lib/vigilo/connector-nagios/backup'
+VIGILO_MESSAGE_BACKUP_TABLE_TOBUS = 'connector_tobus'
+

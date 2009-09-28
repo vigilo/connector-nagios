@@ -1,15 +1,17 @@
 # vim: set fileencoding=utf-8 sw=4 ts=4 et :
+
 """ Metrology connector nagios Pubsub client. """
 from __future__ import absolute_import, with_statement
-
 
 import os, sys
 from twisted.application import app, service
 from twisted.internet import reactor
 from twisted.words.protocols.jabber.jid import JID
-
-from wokkel import client
 from vigilo.common.gettext import translate
+from vigilo.connector.main import daemonize
+from wokkel import client
+from vigilo.pubsub.checknode import VerificationNode
+
 _ = translate(__name__)
 
 
@@ -19,11 +21,10 @@ class ConnectorServiceMaker(object):
     Creates a service that wraps everything the connector nagios needs.
     """
 
-    #implements(service.IServiceMaker, IPlugin)
 
     def makeService(self):
         """ the service that wraps everything the connector nagios needs. """ 
-        from vigilo.connector_metro.nodetorrdtool import NodeToRRDtoolForwarder
+        from vigilo.connector_nagios.sockettonodefw import SocketToNodeForwarder
         from vigilo.pubsub import NodeOwner, Subscription
         from vigilo.common.conf import settings
         xmpp_client = client.XMPPClient(
@@ -32,82 +33,47 @@ class ConnectorServiceMaker(object):
                 settings['VIGILO_CONNECTOR_XMPP_SERVER_HOST'])
         xmpp_client.logTraffic = True
         xmpp_client.setName('xmpp_client')
-
+        
         node_owner = NodeOwner()
         node_owner.setHandlerParent(xmpp_client)
+        
+        list_nodeOwner = settings.get('VIGILO_CONNECTOR_TOPIC_OWNER', [])
+        # liste_nodeSubsciber pas initialisé le service n'as pas besoin de recevoir
+        # des éléments 'VIGILO_CONNECTOR_NAGIOS_TOPIC' liste vide
+        list_nodeSubscriber = settings.get('VIGILO_CONNECTOR_NAGIOS_TOPIC', [])
+        verifyNode = VerificationNode(list_nodeOwner, list_nodeSubscriber, doThings=True)
+        verifyNode.setHandlerParent(xmpp_client)
+        nodetopublish = settings.get('VIGILO_CONNECTOR_TOPIC_PUBLISHER', None)
+        _service = JID(settings.get('VIGILO_CONNECTOR_XMPP_PUBSUB_SERVICE', None))
 
-        connector_sub = Subscription(
-                JID(settings['VIGILO_CONNECTOR_XMPP_PUBSUB_SERVICE']),
-                settings['VIGILO_CONNECTOR_METRO_TOPIC'],
-                node_owner)
-
-        conf_ = settings.get('VIGILO_METRO_CONF', None)
-        msg_consumer = NodeToRRDtoolForwarder(conf_, connector_sub)
-        msg_consumer.setHandlerParent(xmpp_client)
-
+        #Initialise un Socket récupération des messages en provenance de nagios 
+        sr = settings.get('VIGILO_SOCKETR', None)
+        if sr is not None:
+            message_publisher = SocketToNodeForwarder(
+                    sr,settings['VIGILO_MESSAGE_BACKUP_FILE'],
+                    settings['VIGILO_MESSAGE_BACKUP_TABLE_TOBUS'],
+                    nodetopublish,_service)
+            message_publisher.setHandlerParent(xmpp_client)
+        
         root_service = service.MultiService()
         xmpp_client.setServiceParent(root_service)
         return root_service
-
-def daemonize():
-    """ Called to daemonize a program """
-   
-    from vigilo.common.conf import settings
-    import daemon
-    import daemon.pidlockfile
-    stalepid = False
-    alreadyRunning = False
-
-    if settings['VIGILO_CONNECTOR_DAEMONIZE']:
-        pidfile = settings['VIGILO_CONNECTOR_PIDFILE']
-        if pidfile is not None:
-            # We must remove a stale pidfile by hand :/
-            if os.path.exists(pidfile):
-                with open(pidfile) as oldpidfile:
-                    pid = int(oldpidfile.read())
-                try:
-                    os.kill(pid, 0) # Just checks it exists
-                    # This has false positives, no matter.
-                except OSError: # Stale pid
-                    # delaying message after daemonization
-                    stalepid = True
-                    os.unlink(pidfile)
-                else:
-                    # delaying message after daemonization
-                    alreadyRunning = True
-            pidfile = daemon.pidlockfile.PIDLockFile(pidfile)
-        else:
-            pidfile = None
-
-        if alreadyRunning :
-            from vigilo.common.logging import get_logger
-            LOGGER = get_logger(__name__)
-            LOGGER.warning(_('Already running, pid is %(pid)d.') % \
-                           {'pid' : pid})
-            return(1)
-
-        with daemon.DaemonContext(detach_process=True, pidfile=pidfile):
-        #with daemon.DaemonContext(detach_process=False, pidfile=pidfile):
-            if stalepid:
-                from vigilo.common.logging import get_logger
-                LOGGER = get_logger(__name__)
-                LOGGER.info(_('Removing stale pid file at %(pidfile)s ' + \
-                            '(%(pid)d).') % 
-                            {'pidfile': pidfile, 'pid': pid})
-            
-    # never seen
-    print _("daemon mode ON (you should not see this message " + \
-            "except in debug mode")
-    return main()
-
+    
 def main():
-
     """ main function designed to launch the program """
+    from vigilo.common.conf import settings
+    if settings.get('VIGILO_CONNECTOR_DAEMONIZE', False) == True:
+        with daemonize(settings.get('VIGILO_CONNECTOR_PIDFILE', None)):
+            pass
+
     application = service.Application('Twisted PubSub component')
     conn_service = ConnectorServiceMaker().makeService()
     conn_service.setServiceParent(application)
     app.startApplication(application, False)
     reactor.run()
 
+
 if __name__ == '__main__':
-    sys.exit(daemonize())
+    result = main()
+    sys.exit(result)
+

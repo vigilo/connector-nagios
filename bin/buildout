@@ -1,0 +1,12 @@
+#!/usr/bin/python2.5
+
+import sys
+sys.path[0:0] = [
+  '/usr/lib/python2.5/site-packages',
+  '/usr/lib/python2.5/site-packages',
+  ]
+
+import zc.buildout.buildout
+
+if __name__ == '__main__':
+    zc.buildout.buildout.main()
