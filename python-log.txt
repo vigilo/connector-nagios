@@ -1,6 +1,0 @@
-Installing collected packages: 
-Successfully installed 
-------------------------------------------------------------
-/home/smoignar/.buildout/eggs/pip-0.4-py2.5.egg/pip.py run on Fri Sep 25 16:34:14 2009
-Installing collected packages: 
-Successfully installed 
