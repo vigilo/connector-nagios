@@ -33,7 +33,7 @@ class Forwarder(LineReceiver):
             # empty line -> can't parse it
             return
 
-
+        print line
         # already XML or not ?
         if line[0] != '<':
              Xml = converttoxml.text2xml(line)

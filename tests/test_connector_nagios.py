@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 '''
 Created on 29 sept. 2009
 @author: smoignar
