@@ -9,9 +9,7 @@ from twisted.application import app, service
 from twisted.internet import reactor
 from twisted.words.protocols.jabber.jid import JID
 from vigilo.common.gettext import translate
-from vigilo.connector.main import daemonize
 from wokkel import client
-from vigilo.pubsub.checknode import VerificationNode
 
 _ = translate(__name__)
 
@@ -26,6 +24,7 @@ class ConnectorServiceMaker(object):
     def makeService(self):
         """ the service that wraps everything the connector nagios needs. """ 
         #from vigilo.connector_nagios.sockettonodefw import SocketToNodeForwarder
+        from vigilo.pubsub.checknode import VerificationNode
         from vigilo.connector.sockettonodefw import SocketToNodeForwarder
         from vigilo.pubsub import NodeOwner
         from vigilo.common.conf import settings
@@ -77,22 +76,22 @@ class ConnectorServiceMaker(object):
         xmpp_client.setServiceParent(root_service)
         return root_service
     
-def main():
+def do_main_programm():
     """ main function designed to launch the program """
-    from vigilo.common.conf import settings
-
-    if settings.get('VIGILO_CONNECTOR_DAEMONIZE', False) == True:
-        with daemonize(settings.get('VIGILO_CONNECTOR_PIDFILE', None)):
-            pass
-
     application = service.Application('Twisted PubSub component')
     conn_service = ConnectorServiceMaker().makeService()
     conn_service.setServiceParent(application)
     app.startApplication(application, False)
     reactor.run()
 
+def main():
+    """ main function designed to launch the program """
+    from vigilo.common.daemonize import daemonize
+    context = daemonize()
+    with context:
+        do_main_programm()
+
 
 if __name__ == '__main__':
-    result = main()
-    sys.exit(result)
+    main()
 
