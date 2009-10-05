@@ -4,7 +4,8 @@ Created on 30 sept. 2009
 
 @author: smoignar
 '''
-# Teste la sauvegare d'un message nagios dans la database
+# Teste la sauvegarde d'un message nagios dans la database 
+# Cas ou le bus n'est pas actif 
 from __future__ import absolute_import
 import unittest
 from subprocess import *
@@ -22,9 +23,12 @@ class TestSauveDB(unittest.TestCase):
     # Message from Socket impossible to forward(XMPP BUS not connected)
     # Vérification que le message est sauvegardé dans la database 
     def test_startconnector(self):
-        # Demarrage en tâche de fond du connector nagios
-        p = Popen(["python2.5", "/home/smoignar/workspace/connector-nagios/src/vigilo/connector_nagios/main.py"], 
-            bufsize=1,stdin=PIPE, stdout=PIPE)
+        # Demarrage en tâche de fond du connector nagiosnom_connector 
+        list = []
+        list.append(settings.get('VIGILO_CONNECTOR_VPYTHON',[]))
+        list.append(settings.get('VIGILO_CONNECTOR_MAIN',[]))
+        par = ["python2.5","/home/smoignar/workspace/connector-nagios/src/vigilo/connector_nagios/main.py"]
+        p = Popen(par,bufsize=1,stdin=PIPE, stdout=PIPE)
         time.sleep(1)
         pid = p.pid
         
@@ -52,7 +56,7 @@ class TestSauveDB(unittest.TestCase):
         tsocket.close()
         cur.close()
         conn.close()
-        kill(pid, 0)    # suppression du process connector nagios
+        kill(pid, 1)    # suppression du process connector nagios
         # suppression du fichier socket
         remove (adr_socket)
         

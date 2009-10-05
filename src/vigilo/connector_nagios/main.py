@@ -3,7 +3,7 @@
 """ Metrology connector nagios Pubsub client. """
 from __future__ import absolute_import, with_statement
 
-import os, sys
+import sys
 from twisted.application import app, service
 from twisted.internet import reactor
 from twisted.words.protocols.jabber.jid import JID
@@ -24,8 +24,9 @@ class ConnectorServiceMaker(object):
 
     def makeService(self):
         """ the service that wraps everything the connector nagios needs. """ 
-        from vigilo.connector_nagios.sockettonodefw import SocketToNodeForwarder
-        from vigilo.pubsub import NodeOwner, Subscription
+        #from vigilo.connector_nagios.sockettonodefw import SocketToNodeForwarder
+        from vigilo.connector.sockettonodefw import SocketToNodeForwarder
+        from vigilo.pubsub import NodeOwner
         from vigilo.common.conf import settings
         xmpp_client = client.XMPPClient(
                 JID(settings['VIGILO_CONNECTOR_JID']),
@@ -40,7 +41,7 @@ class ConnectorServiceMaker(object):
         list_nodeOwner = settings.get('VIGILO_CONNECTOR_TOPIC_OWNER', [])
         # liste_nodeSubsciber pas initialisé le service n'as pas besoin de recevoir
         # des éléments 'VIGILO_CONNECTOR_NAGIOS_TOPIC' liste vide
-        list_nodeSubscriber = settings.get('VIGILO_CONNECTOR_NAGIOS_TOPIC', [])
+        list_nodeSubscriber = settings.get('VIGILO_CONNECTOR_NAGIOS_TOPIC',[])
         verifyNode = VerificationNode(list_nodeOwner, list_nodeSubscriber, doThings=True)
         verifyNode.setHandlerParent(xmpp_client)
         nodetopublish = settings.get('VIGILO_CONNECTOR_TOPIC_PUBLISHER', None)
