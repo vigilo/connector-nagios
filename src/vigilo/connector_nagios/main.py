@@ -4,6 +4,7 @@
 from __future__ import absolute_import, with_statement
 
 import sys
+from os import getenv, putenv
 from twisted.application import app, service
 from twisted.internet import reactor
 from twisted.words.protocols.jabber.jid import JID
@@ -28,10 +29,23 @@ class ConnectorServiceMaker(object):
         from vigilo.connector.sockettonodefw import SocketToNodeForwarder
         from vigilo.pubsub import NodeOwner
         from vigilo.common.conf import settings
-        xmpp_client = client.XMPPClient(
+       
+       
+        variable  = ["TESTCONNECTOR_NAGIOS" ]
+        env = {}
+        for name in variable:
+            value = getenv(name)
+        if name == "TESTCONNECTOR_NAGIOS" and value == "TESTS":
+            xmpp_client = client.XMPPClient(
+                JID(settings['VIGILO_CONNECTOR_JID']),
+                settings['VIGILO_CONNECTOR_PASS'],
+                settings['VIGILO_CONNECTOR_XMPP_SERVER_HOSTTEST'])   
+        else:
+           xmpp_client = client.XMPPClient(
                 JID(settings['VIGILO_CONNECTOR_JID']),
                 settings['VIGILO_CONNECTOR_PASS'],
                 settings['VIGILO_CONNECTOR_XMPP_SERVER_HOST'])
+           
         xmpp_client.logTraffic = True
         xmpp_client.setName('xmpp_client')
         
@@ -46,6 +60,9 @@ class ConnectorServiceMaker(object):
         verifyNode.setHandlerParent(xmpp_client)
         nodetopublish = settings.get('VIGILO_CONNECTOR_TOPIC_PUBLISHER', None)
         _service = JID(settings.get('VIGILO_CONNECTOR_XMPP_PUBSUB_SERVICE', None))
+        
+         
+        
 
         #Initialise un Socket récupération des messages en provenance de nagios 
         sr = settings.get('VIGILO_SOCKETR', None)
@@ -63,6 +80,7 @@ class ConnectorServiceMaker(object):
 def main():
     """ main function designed to launch the program """
     from vigilo.common.conf import settings
+
     if settings.get('VIGILO_CONNECTOR_DAEMONIZE', False) == True:
         with daemonize(settings.get('VIGILO_CONNECTOR_PIDFILE', None)):
             pass

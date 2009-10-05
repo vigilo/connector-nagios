@@ -9,7 +9,7 @@ Created on 30 sept. 2009
 from __future__ import absolute_import
 import unittest
 from subprocess import *
-from os import kill, remove
+from os import kill, remove, putenv, system
 import time
 from socket import * 
 from vigilo.common.conf import settings
@@ -24,11 +24,17 @@ class TestSauveDB(unittest.TestCase):
     # Vérification que le message est sauvegardé dans la database 
     def test_startconnector(self):
         # Demarrage en tâche de fond du connector nagiosnom_connector 
+        # Mise en place d'une variable environnement de test TESTNAGIOS
+       
         list = []
         list.append(settings.get('VIGILO_CONNECTOR_VPYTHON',[]))
         list.append(settings.get('VIGILO_CONNECTOR_MAIN',[]))
-        par = ["python2.5","/home/smoignar/workspace/connector-nagios/src/vigilo/connector_nagios/main.py"]
-        p = Popen(par,bufsize=1,stdin=PIPE, stdout=PIPE)
+        par = ["bin/python","/home/smoignar/workspace/connector-nagios/src/vigilo/connector_nagios/main.py"]
+        
+        p = Popen(par,bufsize=1,stdin=PIPE, stdout=PIPE, env = {'TESTCONNECTOR_NAGIOS':'TESTS'})
+        
+        #p = Popen(par,bufsize=1,stdin=PIPE, stdout=PIPE)
+              
         time.sleep(1)
         pid = p.pid
         
@@ -49,7 +55,7 @@ class TestSauveDB(unittest.TestCase):
         b = tsocket.send("""<perf xmlns='%(ns)s'><timestamp>1165939739</timestamp><host>serveur1.example.com</host><datasource>Load</datasource><value>10</value></perf>\n""" % dico)
         time.sleep(1)      
     
-        # récupération du nomnbre de message dans la table aprés send
+        # récupération du nombre de message dans la table après send
         cur.execute(requete)
         raw_ap = cur.fetchone()[0]
              
