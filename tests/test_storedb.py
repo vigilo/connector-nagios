@@ -8,10 +8,10 @@ Created on 30 sept. 2009
 # Cas ou le bus n'est pas actif 
 from __future__ import absolute_import
 import unittest
-from subprocess import *
+from subprocess import Popen, PIPE
 from os import kill, remove, putenv, system
 import time
-from socket import * 
+from socket import socket, AF_UNIX, SOCK_STREAM
 from vigilo.common.conf import settings
 import sqlite3
 
@@ -29,7 +29,7 @@ class TestSauveDB(unittest.TestCase):
         par = []
         par.append(settings.get('VIGILO_CONNECTOR_VPYTHON',[]))
         par.append(settings.get('VIGILO_CONNECTOR_MAIN',[]))
-       
+        
         # Mise en tache de fonf du connector nagios, mise place de la variable d'environnement 
         # pour TEST fonctionnel
         p = Popen(par,bufsize=1,stdin=PIPE,stdout=PIPE,env = {'TESTCONNECTOR_NAGIOS':'TESTS'})
