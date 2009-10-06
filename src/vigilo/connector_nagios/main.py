@@ -24,43 +24,46 @@ class ConnectorServiceMaker(object):
         """ the service that wraps everything the connector nagios needs. """ 
         from vigilo.pubsub.checknode import VerificationNode
         from vigilo.connector.sockettonodefw import SocketToNodeForwarder
-        from vigilo.pubsub import NodeOwner
+        #from vigilo.pubsub import NodeOwner
         from vigilo.common.conf import settings
        
        
-        variable  = ["TESTCONNECTOR_NAGIOS" ]
-        for name in variable:
-            value = getenv(name)
-        if name == "TESTCONNECTOR_NAGIOS" and value == "TESTS":
-            xmpp_client = client.XMPPClient(
-                JID(settings['VIGILO_CONNECTOR_JID']),
-                settings['VIGILO_CONNECTOR_PASS'],
-                settings['VIGILO_CONNECTOR_XMPP_SERVER_HOSTTEST'])   
+        if getenv('TESTCONNECTOR_NAGIOS') == "TESTS":
+            host = settings['VIGILO_CONNECTOR_XMPP_SERVER_HOSTTEST']
         else:
-           xmpp_client = client.XMPPClient(
-                JID(settings['VIGILO_CONNECTOR_JID']),
-                settings['VIGILO_CONNECTOR_PASS'],
-                settings['VIGILO_CONNECTOR_XMPP_SERVER_HOST'])
+            host = settings['VIGILO_CONNECTOR_XMPP_SERVER_HOST']
+
+        xmpp_client = client.XMPPClient(
+            JID(settings['VIGILO_CONNECTOR_JID']),
+            settings['VIGILO_CONNECTOR_PASS'],
+            host)   
            
         xmpp_client.logTraffic = True
         xmpp_client.setName('xmpp_client')
         
-        node_owner = NodeOwner()
-        node_owner.setHandlerParent(xmpp_client)
+        #node_owner = NodeOwner()
+        #node_owner.setHandlerParent(xmpp_client)
         
-        list_nodeOwner = settings.get('VIGILO_CONNECTOR_TOPIC_OWNER',[])
-        # liste_nodeSubsciber pas initialisé le service n'as pas besoin de recevoir
+        list_nodeOwner = settings.get('VIGILO_CONNECTOR_TOPIC_OWNER', [])
+        # liste_nodeSubsciber pas initialisé le service n'as 
+        #  pas besoin de recevoir
         # des éléments 'VIGILO_CONNECTOR_NAGIOS_TOPIC' liste vide
-        list_nodeSubscriber = settings.get('VIGILO_CONNECTOR_NAGIOS_TOPIC',[])
-        verifyNode = VerificationNode(list_nodeOwner, list_nodeSubscriber, doThings=True)
+        list_nodeSubscriber = settings.get('VIGILO_CONNECTOR_NAGIOS_TOPIC', 
+                                           [])
+        verifyNode = VerificationNode(
+                list_nodeOwner, 
+                list_nodeSubscriber,
+                doThings=True)
         verifyNode.setHandlerParent(xmpp_client)
         nodetopublish = settings.get('VIGILO_CONNECTOR_TOPIC_PUBLISHER', None)
-        _service = JID(settings.get('VIGILO_CONNECTOR_XMPP_PUBSUB_SERVICE', None))
+        _service = JID(settings.get('VIGILO_CONNECTOR_XMPP_PUBSUB_SERVICE', 
+                                    None))
         
          
         
 
-        #Initialise un Socket récupération des messages en provenance de nagios 
+        # Initialise un Socket récupération des messages en provenance 
+        #  de nagios 
         sr = settings.get('VIGILO_SOCKETR', None)
         if sr is not None:
             message_publisher = SocketToNodeForwarder(
