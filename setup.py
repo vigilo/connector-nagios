@@ -9,9 +9,9 @@ setup(name='vigilo-connector-nagios',
         url='http://www.projet-vigilo.org/',
         description='vigilo metrology connector nagios component',
         license='http://www.gnu.org/licenses/gpl-2.0.html',
-        long_description='The vigilo metrology connector component is a connector between:\n'
+        long_description='The vigilo nagios connector component is a connector between:\n'
         +'   - XMPP/PubSub BUS of message\n'
-        +'   - RRDtool\n',
+        +'   - nagios\n',
         install_requires=[
             # dashes become underscores
             # order is important (wokkel before Twisted)
@@ -25,7 +25,6 @@ setup(name='vigilo-connector-nagios',
             'python-daemon',
             'wokkel',
             'Twisted',
-            #'rrdtool',
             ],
         namespace_packages = [
             'vigilo',

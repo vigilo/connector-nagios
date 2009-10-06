@@ -22,7 +22,6 @@ class ConnectorServiceMaker(object):
 
     def makeService(self):
         """ the service that wraps everything the connector nagios needs. """ 
-        #from vigilo.connector_nagios.sockettonodefw import SocketToNodeForwarder
         from vigilo.pubsub.checknode import VerificationNode
         from vigilo.connector.sockettonodefw import SocketToNodeForwarder
         from vigilo.pubsub import NodeOwner
