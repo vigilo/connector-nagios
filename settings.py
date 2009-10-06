@@ -1,7 +1,7 @@
 # vim: set fileencoding=utf-8 sw=4 ts=4 et :
 import logging
 LOGGING_PLUGINS = (
-#        'vigilo.pubsub.logging',       
+        'vigilo.pubsub.logging',       
         )
 LOGGING_SETTINGS = { 'level': logging.DEBUG, }
 LOGGING_LEVELS = {}

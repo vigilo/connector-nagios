@@ -3,8 +3,7 @@
 """ Metrology connector nagios Pubsub client. """
 from __future__ import absolute_import, with_statement
 
-import sys
-from os import getenv, putenv
+from os import getenv
 from twisted.application import app, service
 from twisted.internet import reactor
 from twisted.words.protocols.jabber.jid import JID
@@ -31,7 +30,6 @@ class ConnectorServiceMaker(object):
        
        
         variable  = ["TESTCONNECTOR_NAGIOS" ]
-        env = {}
         for name in variable:
             value = getenv(name)
         if name == "TESTCONNECTOR_NAGIOS" and value == "TESTS":
@@ -51,7 +49,7 @@ class ConnectorServiceMaker(object):
         node_owner = NodeOwner()
         node_owner.setHandlerParent(xmpp_client)
         
-        list_nodeOwner = settings.get('VIGILO_CONNECTOR_TOPIC_OWNER', [])
+        list_nodeOwner = settings.get('VIGILO_CONNECTOR_TOPIC_OWNER',[])
         # liste_nodeSubsciber pas initialisé le service n'as pas besoin de recevoir
         # des éléments 'VIGILO_CONNECTOR_NAGIOS_TOPIC' liste vide
         list_nodeSubscriber = settings.get('VIGILO_CONNECTOR_NAGIOS_TOPIC',[])
