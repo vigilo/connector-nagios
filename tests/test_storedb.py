@@ -26,14 +26,13 @@ class TestSauveDB(unittest.TestCase):
         # Demarrage en tâche de fond du connector nagiosnom_connector 
         # Mise en place d'une variable environnement de test TESTNAGIOS
        
-        list = []
-        list.append(settings.get('VIGILO_CONNECTOR_VPYTHON',[]))
-        list.append(settings.get('VIGILO_CONNECTOR_MAIN',[]))
-        par = ["bin/python","/home/smoignar/workspace/connector-nagios/src/vigilo/connector_nagios/main.py"]
-        
-        p = Popen(par,bufsize=1,stdin=PIPE, stdout=PIPE, env = {'TESTCONNECTOR_NAGIOS':'TESTS'})
-        
-        #p = Popen(par,bufsize=1,stdin=PIPE, stdout=PIPE)
+        par = []
+        par.append(settings.get('VIGILO_CONNECTOR_VPYTHON',[]))
+        par.append(settings.get('VIGILO_CONNECTOR_MAIN',[]))
+       
+        # Mise en tache de fonf du connector nagios, mise place de la variable d'environnement 
+        # pour TEST fonctionnel
+        p = Popen(par,bufsize=1,stdin=PIPE,stdout=PIPE,env = {'TESTCONNECTOR_NAGIOS':'TESTS'})
               
         time.sleep(1)
         pid = p.pid
