@@ -9,6 +9,7 @@ from __future__ import absolute_import
 import unittest
 
 from vigilo.connector.converttoxml import text2xml
+from vigilo import connector_nagios
 
 NS_EVENT = 'http://www.projet-vigilo.org/xmlns/event1'
 NS_PERF = 'http://www.projet-vigilo.org/xmlns/perf1'
