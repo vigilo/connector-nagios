@@ -28,14 +28,13 @@ class TestSauveDB(unittest.TestCase):
        
         commandline = "%(WD)s/bin/connector-nagios" % {'WD': getcwd()}
         
-        # Mise en tache de fonf du connector nagios, mise place de la variable d'environnement 
-        # pour TEST fonctionnel
+        # Mise en tache de fond du connector nagios, mise place de la variable d'environnement 
+        # pour TEST fonctionnel avec un serveur inexistant
         p = Popen(commandline,bufsize=1,stdin=PIPE,stdout=PIPE,env = {
-            'TESTCONNECTOR_NAGIOS': 'TESTS',
-            'VIGILO_SETTINGS': getcwd() + "/settings.py"
+            'VIGILO_SETTINGS': getcwd() + "/settings_tests.py",
             })
-              
-        time.sleep(1)
+        # attente que la commande précédente s'exécute
+        time.sleep(2)
         pid = p.pid
         
         # connection à la database puis récupération du nombre d'enregistrement

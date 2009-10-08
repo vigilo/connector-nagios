@@ -24,25 +24,17 @@ class ConnectorServiceMaker(object):
         """ the service that wraps everything the connector nagios needs. """ 
         from vigilo.pubsub.checknode import VerificationNode
         from vigilo.connector.sockettonodefw import SocketToNodeForwarder
-        #from vigilo.pubsub import NodeOwner
         from vigilo.common.conf import settings
        
        
-        if getenv('TESTCONNECTOR_NAGIOS') == "TESTS":
-            host = settings['VIGILO_CONNECTOR_XMPP_SERVER_HOSTTEST']
-        else:
-            host = settings['VIGILO_CONNECTOR_XMPP_SERVER_HOST']
-
         xmpp_client = client.XMPPClient(
             JID(settings['VIGILO_CONNECTOR_JID']),
             settings['VIGILO_CONNECTOR_PASS'],
-            host)   
+            settings['VIGILO_CONNECTOR_XMPP_SERVER_HOST'])   
            
         xmpp_client.logTraffic = True
         xmpp_client.setName('xmpp_client')
         
-        #node_owner = NodeOwner()
-        #node_owner.setHandlerParent(xmpp_client)
         
         list_nodeOwner = settings.get('VIGILO_CONNECTOR_TOPIC_OWNER', [])
         # liste_nodeSubsciber pas initialisé le service n'as 

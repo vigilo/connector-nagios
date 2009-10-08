@@ -1,7 +1,7 @@
 # vim: set fileencoding=utf-8 sw=4 ts=4 et :
 import logging
 LOGGING_PLUGINS = (
-        'vigilo.pubsub.logging',       
+        #'vigilo.pubsub.logging',       
         )
 LOGGING_SETTINGS = { 'level': logging.DEBUG, }
 LOGGING_LEVELS = {}
@@ -11,20 +11,18 @@ LOG_TRAFFIC = True
 
 LOGGING_SETTINGS = {
         # 5 is the 'SUBDEBUG' level.
-        'level': logging.DEBUG,
+        'level': logging.error,
         'format': '%(levelname)s::%(name)s::%(message)s',
         }
 LOGGING_LEVELS = {
-        'multiprocessing': logging.DEBUG,
         'twisted': logging.DEBUG,
         'vigilo.pubsub': logging.DEBUG,
-        'vigilo.connector': logging.DEBUG,
+        'vigilo.connector-nagios': logging.DEBUG,
     }
 
 
 
-VIGILO_CONNECTOR_XMPP_SERVER_HOST = 'localhost'
-VIGILO_CONNECTOR_XMPP_SERVER_HOSTTEST = 'localhost2'
+VIGILO_CONNECTOR_XMPP_SERVER_HOST = 'unknown'
 VIGILO_CONNECTOR_XMPP_PUBSUB_SERVICE = 'pubsub.localhost'
 # Respect the ejabberd namespacing, for now. It will be too restrictive soon.
 VIGILO_CONNECTOR_JID = 'connector-nagios@localhost'
@@ -42,7 +40,7 @@ VIGILO_CONNECTOR_TOPIC_PUBLISHER = {
         }
 
 
-VIGILO_SOCKETR = '/var/lib/vigilo/connector-nagios/send.sock'
-VIGILO_MESSAGE_BACKUP_FILE = '/var/lib/vigilo/connector-nagios/backup'
+VIGILO_SOCKETR = '/tmp/connector-nagios_send.sock'
+VIGILO_MESSAGE_BACKUP_FILE = '/tmp/connector-nagios_backup'
 VIGILO_MESSAGE_BACKUP_TABLE_TOBUS = 'connector_tobus'
 
