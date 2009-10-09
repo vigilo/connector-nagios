@@ -35,7 +35,7 @@ setup(name='vigilo-connector-nagios',
             ],
         entry_points={
             'console_scripts': [
-                'connector-nagios = vigilo.connector_nagios.main:main',
+                'connector-nagios = vigilo.connector.main:main',
                 ],
             },
         package_dir={'': 'src'},

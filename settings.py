@@ -3,8 +3,6 @@ import logging
 LOGGING_PLUGINS = (
         'vigilo.pubsub.logging',       
         )
-LOGGING_SETTINGS = { 'level': logging.DEBUG, }
-LOGGING_LEVELS = {}
 LOGGING_SYSLOG = True
 LOG_TRAFFIC = True
 
@@ -15,7 +13,6 @@ LOGGING_SETTINGS = {
         'format': '%(levelname)s::%(name)s::%(message)s',
         }
 LOGGING_LEVELS = {
-        'multiprocessing': logging.DEBUG,
         'twisted': logging.DEBUG,
         'vigilo.pubsub': logging.DEBUG,
         'vigilo.connector': logging.DEBUG,
@@ -32,6 +29,7 @@ VIGILO_CONNECTOR_PASS = 'connector-nagios'
 
 # listen on this node (écoute de ce noeud)
 # pas initialisé le connector nagios n'as pas à recevoir des messages du BUS
+#VIGILO_CONNECTOR_TOPIC = ['/home/localhost/connectorx/BUS']
 # create this node (créer ce noeud)
 VIGILO_CONNECTOR_TOPIC_OWNER = ['/home/localhost/connector-nagios/BUS']
 

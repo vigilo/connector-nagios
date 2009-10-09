@@ -1,1 +1,1 @@
-""" metrology vigilo connector nagios """
+""" vigilo connector nagios """
