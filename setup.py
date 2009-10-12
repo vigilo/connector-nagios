@@ -7,7 +7,7 @@ setup(name='vigilo-connector-nagios',
         author='Serge MOIGNARD',
         author_email='serge.moignard@c-s.fr',
         url='http://www.projet-vigilo.org/',
-        description='vigilo metrology connector nagios component',
+        description='vigilo nagios connector component',
         license='http://www.gnu.org/licenses/gpl-2.0.html',
         long_description='The vigilo nagios connector component is a connector between:\n'
         +'   - XMPP/PubSub BUS of message\n'
