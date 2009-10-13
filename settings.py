@@ -39,8 +39,9 @@ VIGILO_CONNECTOR_TOPIC_PUBLISHER = {
         'event': '/home/localhost/connector-nagios/BUS',
         }
 
-
+VIGILO_PIPEW = '/var/lib/vigilo/connector-nagios/recv.pipe'
 VIGILO_SOCKETR = '/var/lib/vigilo/connector-nagios/send.sock'
 VIGILO_MESSAGE_BACKUP_FILE = '/var/lib/vigilo/connector-nagios/backup'
 VIGILO_MESSAGE_BACKUP_TABLE_TOBUS = 'connector_tobus'
+VIGILO_MESSAGE_BACKUP_TABLE_FROMBUS = 'connector_frombus'
 
