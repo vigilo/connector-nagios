@@ -48,16 +48,13 @@ class XMPPToPipeForwarder(XMPPHandler):
         self.retry = DbRetry(dbfilename, dbtable)
         self.__backuptoempty = os.path.exists(dbfilename)
         self.pipe_filename = pipe_filename
-        self.__emptyingbackup = False
 
     def sendQueuedMessages(self):
         """
         Called to send Message previously stored
         """
-        if self.__emptyingbackup: 
-            return
-        self.__emptyingbackup = True
         if self.__backuptoempty:
+            self.__backuptoempty = False
             # XXX Ce code peut potentiellement boucler indéfiniment...
             while True:
                 msg = self.retry.unstore()
@@ -65,10 +62,11 @@ class XMPPToPipeForwarder(XMPPHandler):
                     break
                 else:
                     if self.messageForward(msg) is not True:
+                        # we loose the ability to send message again
+                        self.__backuptoempty = True
                         break
-            self.__backuptoempty = False
+
             self.retry.vacuum()
-        self.__emptyingbackup = False
 
 
     def connectionMade(self):
