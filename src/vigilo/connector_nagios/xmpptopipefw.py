@@ -44,6 +44,18 @@ class XMPPToPipeForwarder(XMPPHandler):
 
 
     def __init__(self, pipe_filename, dbfilename, dbtable):
+        """
+        Instancie un connecteur XMPP vers pipe.
+
+        @param pipe_filename: le nom du fichier pipe qui accueillra les 
+        messages XMPP
+        @type pipe_filename: C{str}
+        @param dbfilename: le nom du fichier permettant la sauvegarde des 
+        messages en cas de problème d'éciture sur le pipe
+        @type dbfilename: C{str}
+        @param dbtable: Le nom de la table SQL dans ce fichier.
+        @type dbtable: C{str}
+        """
         XMPPHandler.__init__(self)
         self.retry = DbRetry(dbfilename, dbtable)
         self.__backuptoempty = os.path.exists(dbfilename)
