@@ -77,7 +77,6 @@ class XMPPToPipeForwarder(XMPPHandler):
                         # we loose the ability to send message again
                         self.__backuptoempty = True
                         break
-
             self.retry.vacuum()
 
 
@@ -142,13 +141,14 @@ class XMPPToPipeForwarder(XMPPHandler):
                          if element.name in ('body',)]
 
         for b in bodys:
-            # the data we need is just underneath
-            # les données dont on a besoin sont juste en dessous
-            #self.messageForward(b.toXml().encode('utf8'))
-            #return
             for data in b.elements():
-                LOGGER.debug(_('Message from chat message to forward: ' +
-                               '%s') %
-                               data.toXml().encode('utf8'))
-                self.messageForward(data.toXml().encode('utf8'))
-
+                # the data we need is just underneath
+                # les données dont on a besoin sont juste en dessous
+                if data.name != 'hls':
+                    LOGGER.error(_("unknown message type" + 
+                        "(type: '%s')") % data.name)
+                    continue
+                for raw in data.children:
+                    LOGGER.debug(_('Message from chat message to forward: ' + 
+                                   '%s') % raw)
+                    self.messageForward(raw)
