@@ -10,7 +10,7 @@ LOG_TRAFFIC = True
 LOGGING_SETTINGS = {
         # 5 is the 'SUBDEBUG' level.
         'level': logging.DEBUG,
-        'format': '%(levelname)s::%(name)s::%(message)s',
+        'format': '[%(created)f] %(levelname)s::%(name)s::%(message)s',
         }
 LOGGING_LEVELS = {
         'twisted': logging.DEBUG,
