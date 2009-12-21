@@ -19,7 +19,10 @@ LOGGING_LEVELS = {
         'vigilo.connector-nagios': logging.DEBUG,
     }
 
-
+VIGILO_CONNECTOR_ACCEPTED_COMMAND_TYPES = [
+    'collect',
+    'hls',
+]
 
 VIGILO_CONNECTOR_XMPP_SERVER_HOST = 'vigilo-dev'
 VIGILO_CONNECTOR_XMPP_PUBSUB_SERVICE = 'pubsub.localhost'

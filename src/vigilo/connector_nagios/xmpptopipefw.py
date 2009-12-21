@@ -122,7 +122,7 @@ class XMPPToPipeForwarder(XMPPHandler):
         except OSError, e:
             LOGGER.error(_('Message impossible to forward %(error_message)s' +
                            ', the message is stored for later reemission') % \
-                            {'error_message': e.__str__()})
+                            {'error_message': str(e)})
             self.retry.store(msg)
             self.__backuptoempty = True
 
@@ -144,11 +144,12 @@ class XMPPToPipeForwarder(XMPPHandler):
             for data in b.elements():
                 # the data we need is just underneath
                 # les données dont on a besoin sont juste en dessous
-                if data.name != 'hls':
-                    LOGGER.error(_("unknown message type" + 
-                        "(type: '%s')") % data.name)
+                if data.name != 'command' and data['type'] not in \
+                    settings['VIGILO_CONNECTOR_ACCEPTED_COMMAND_TYPES']:
+                    LOGGER.error(_("Command type (type: '%s') " 
+                        "unrecognized or disallowed by policy") % data['type'])
                     continue
                 for raw in data.children:
-                    LOGGER.debug(_('Message from chat message to forward: ' + 
-                                   '%s') % raw)
+                    LOGGER.debug(_('Chat message to forward: %s') % raw)
                     self.messageForward(raw)
+
