@@ -21,7 +21,7 @@ class TestSequenceFunctions(unittest.TestCase):
         """ Test the connector function event2xml """
         dico = {'ns': NS_EVENT}
         # subfunction event2xml 
-        self.assertEqual("""<event xmlns='%(ns)s'><timestamp>1165939739</timestamp><host>serveur1.example.com</host><ip>192.168.0.1</ip><service>Load</service><state>CRITICAL</state><message>CRITICAL: load avg: 12 10 10</message></event>""" % dico, text2xml("""event|1165939739|serveur1.example.com|192.168.0.1|Load|CRITICAL|CRITICAL: load avg: 12 10 10""").toXml())
+        self.assertEqual("""<event xmlns='%(ns)s'><timestamp>1165939739</timestamp><host>serveur1.example.com</host><service>Load</service><state>CRITICAL</state><message>CRITICAL: load avg: 12 10 10</message></event>""" % dico, text2xml("""event|1165939739|serveur1.example.com|Load|CRITICAL|CRITICAL: load avg: 12 10 10""").toXml())
     
     def test_perft2xml(self):
         """ Test the connector function perf2xml """
