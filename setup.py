@@ -2,6 +2,12 @@
 # vim: set fileencoding=utf-8 sw=4 ts=4 et :
 from setuptools import setup
 
+tests_require = [
+    'coverage',
+    'nose',
+    'pylint',
+]
+
 setup(name='vigilo-connector-nagios',
         version='0.1',
         author='Serge MOIGNARD',
@@ -16,9 +22,6 @@ setup(name='vigilo-connector-nagios',
             # dashes become underscores
             # order is important (wokkel before Twisted)
             'setuptools',
-            'coverage',
-            'nose',
-            'pylint',
             'vigilo-common',
             'vigilo-pubsub',
             'vigilo-connector',
@@ -33,6 +36,9 @@ setup(name='vigilo-connector-nagios',
             'vigilo',
             'vigilo.connector_nagios',
             ],
+        extras_require={
+            'tests': tests_require,
+        },
         entry_points={
             'console_scripts': [
                 'connector-nagios = vigilo.connector_nagios.main:main',
