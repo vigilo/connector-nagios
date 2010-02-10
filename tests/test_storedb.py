@@ -31,24 +31,24 @@ class TestSauveDB(unittest.TestCase):
         # Mise en tache de fond du connector nagios, mise place de la variable d'environnement 
         # pour TEST fonctionnel avec un serveur inexistant
         p = Popen(commandline,bufsize=1,stdin=PIPE,stdout=PIPE,env = {
-            'VIGILO_SETTINGS': getcwd() + "/settings_tests.py",
+            'VIGILO_SETTINGS': getcwd() + "/settings_tests.ini",
             })
         # attente que la commande précédente s'exécute
         time.sleep(2)
         pid = p.pid
         
         # connection à la database puis récupération du nombre d'enregistrement
-        base = settings.get('VIGILO_MESSAGE_BACKUP_FILE',[])
+        base = settings['connector-nagios'].get('vigilo_message_backup_file',[])
         conn = sqlite3.connect(base)
         cur = conn.cursor()
         # récupération du nomnbre de message dans la table avant send
-        requete = 'select count(*) from ' + settings.get('VIGILO_MESSAGE_BACKUP_TABLE_TOBUS',[])
+        requete = 'select count(*) from ' + settings['connector-nagios'].get('vigilo_message_backup_table_tobus',[])
         cur.execute(requete)
         raw_av = cur.fetchone()[0]
 
         # Création de la socket
         tsocket = socket(AF_UNIX, SOCK_STREAM)
-        adr_socket = settings.get('VIGILO_SOCKETR', [])
+        adr_socket = settings['connector-nagios'].get('vigilo_socketr', [])
         tsocket.connect(adr_socket) 
         dico = {'ns': NS_PERF}    
         b = tsocket.send("""<perf xmlns='%(ns)s'><timestamp>1165939739</timestamp><host>serveur1.example.com</host><datasource>Load</datasource><value>10</value></perf>\n""" % dico)
