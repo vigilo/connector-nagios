@@ -145,7 +145,7 @@ class XMPPToPipeForwarder(XMPPHandler):
                 # the data we need is just underneath
                 # les données dont on a besoin sont juste en dessous
                 if data.name != 'command' and data['type'] not in \
-                    settings['connector-nagios']['vigilo_connector_accepted_command_types']:
+                    settings['connector-nagios']['accepted_commands']:
                     LOGGER.error(_("Command type (type: '%s') " 
                         "unrecognized or disallowed by policy") % data['type'])
                     continue

@@ -29,24 +29,36 @@ class ConnectorServiceMaker(object):
         LOGGER = get_logger(__name__)
 
         xmpp_client = client.XMPPClient(
-                JID(settings['connector-nagios']['vigilo_connector_jid']),
-                settings['connector-nagios']['vigilo_connector_pass'],
-                settings['connector-nagios']['vigilo_connector_xmpp_server_host'])
-        xmpp_client.logTraffic = True
+                JID(settings['bus']['jid']),
+                settings['bus']['password'],
+                settings['bus']['host'])
         xmpp_client.setName('xmpp_client')
 
-        list_nodeOwner = settings['connector-nagios'].get('vigilo_connector_topic_owner', [])
-        list_nodeSubscriber = settings['connector-nagios'].get('vigilo_connector_topic', [])
+        try:
+            xmpp_client.logTraffic = settings['bus'].as_bool('log_traffic')
+        except KeyError:
+            xmpp_client.logTraffic = False
+
+
+        try:
+            list_nodeOwner = settings['bus'].as_list('owned_topics')
+        except KeyError:
+            list_nodeOwner = []
+
+        try:
+            list_nodeSubscriber = settings['bus'].as_list('watched_topics')
+        except KeyError:
+            list_nodeSubscriber = []
+
         verifyNode = VerificationNode(list_nodeOwner, list_nodeSubscriber, 
                                       doThings=True)
         verifyNode.setHandlerParent(xmpp_client)
-        nodetopublish = settings.get('vigilo_connector_topic_publisher', {})
-        _service = JID(settings['connector-nagios'].get('vigilo_connector_xmpp_pubsub_service',
-                                    None))
+        nodetopublish = settings.get('publications', {})
+        _service = JID(settings['bus'].get('service', None))
 
-        bkpfile = settings['connector-nagios'].get('vigilo_message_backup_file', ":memory:")
-        pw = settings['connector-nagios'].get('vigilo_pipew', None)
-        sr = settings['connector-nagios'].get('vigilo_socketr', None)
+        bkpfile = settings['connector'].get('backup_file', ":memory:")
+        pw = settings['connector-nagios'].get('nagios_pipe', None)
+        sr = settings['connector-nagios'].get('listen_unix', None)
 
         for i in bkpfile, pw, sr:
             if i != ':memory:' and i is not None:
@@ -75,7 +87,7 @@ class ConnectorServiceMaker(object):
             message_consumer = XMPPToPipeForwarder(
                     pw,
                     bkpfile,
-                    settings['connector-nagios']['vigilo_message_backup_table_frombus'])
+                    settings['connector']['backup_table_from_bus'])
             message_consumer.setHandlerParent(xmpp_client)
 
 
@@ -83,7 +95,7 @@ class ConnectorServiceMaker(object):
             message_publisher = SocketToNodeForwarder(
                     sr,
                     bkpfile,
-                    settings['connector-nagios']['vigilo_message_backup_table_tobus'],
+                    settings['connector']['backup_table_to_bus'],
                     nodetopublish,
                     _service)
             message_publisher.setHandlerParent(xmpp_client)

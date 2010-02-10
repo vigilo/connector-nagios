@@ -7,14 +7,14 @@ fi
 STATE=(CRITICAL WARNING UNKNOWN OK OK)
 # les services supervisés
 # L'entrée '' permet d'envoyer des alertes sur les hôtes directement.
-INDICATEUR=('Interface eth0' 'Interface eth1' 'Interface eth2' '')
+INDICATEUR=('Interface eth0' 'Interface eth1' 'Interface eth2' '' 'HTTPd' 'CPU' 'Processes')
 # la liste des serveurs
 # La valeur 'HLS' est réservée et correspond
 # aux services de haut niveau (High-Level Services).
-SERVER=(host2.example.com)
+SERVER=(host2.example.com host1.example.com proto4 messagerie brouteur)
 # les délais entre 2 messages (min et max)
-DELAI_MIN=3
-DELAI_MAX=5
+DELAI_MIN=1
+DELAI_MAX=1
 
 
 
