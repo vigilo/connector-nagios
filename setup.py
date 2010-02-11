@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 # vim: set fileencoding=utf-8 sw=4 ts=4 et :
+import os
 from setuptools import setup
 
 sysconfdir = os.getenv("SYSCONFDIR", "/etc")
