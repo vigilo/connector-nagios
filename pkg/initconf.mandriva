@@ -1,0 +1,3 @@
+# Default configuration for Vigilo-Nagios connector
+
+#OPTIONS="--daemon"

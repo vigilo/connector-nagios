@@ -2,6 +2,9 @@
 # vim: set fileencoding=utf-8 sw=4 ts=4 et :
 from setuptools import setup
 
+sysconfdir = os.getenv("SYSCONFDIR", "/etc")
+localstatedir = os.getenv("LOCALSTATEDIR", "/var")
+
 tests_require = [
     'coverage',
     'nose',
@@ -10,8 +13,8 @@ tests_require = [
 
 setup(name='vigilo-connector-nagios',
         version='0.1',
-        author='Serge MOIGNARD',
-        author_email='serge.moignard@c-s.fr',
+        author='Vigilo Team',
+        author_email='contact@projet-vigilo.org',
         url='http://www.projet-vigilo.org/',
         description='vigilo nagios connector component',
         license='http://www.gnu.org/licenses/gpl-2.0.html',
@@ -41,9 +44,14 @@ setup(name='vigilo-connector-nagios',
         },
         entry_points={
             'console_scripts': [
-                'connector-nagios = vigilo.connector_nagios.main:main',
+                'vigilo-connector-nagios = vigilo.connector_nagios.main:main',
                 ],
             },
         package_dir={'': 'src'},
+        data_files=[
+                    (os.path.join(sysconfdir, "vigilo/connector-nagios"),
+                        ["settings.ini"]),
+                    (os.path.join(localstatedir, "lib/vigilo/connector-nagios"), []),
+                   ],
         )
 

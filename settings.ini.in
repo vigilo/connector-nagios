@@ -3,7 +3,7 @@
 log_traffic = True
 
 # Nom ou adresse IP du serveur XMPP à utiliser.
-host = vigilo-dev
+host = localhost
 
 # Nom du service de publication pour les messages.
 service = pubsub.localhost
@@ -21,13 +21,13 @@ watched_topics = ,
 
 # Liste des noms des topics à créer, séparés par des virgules.
 # Si la liste est vide, mettre uniquement une virgule.
-owned_topics = /home/localhost/connector-nagios/BUS,
+owned_topics = /home/localhost/connector-nagios/event, /home/localhost/connector-nagios/perf, /home/localhost/connector-nagios/state
 
 
 
 [connector]
 # Emplacement du fichier de sauvegarde local en cas de pannes.
-backup_file = /var/lib/vigilo/connector-nagios/backup
+backup_file = @LOCALSTATEDIR@/lib/vigilo/connector-nagios/backup.sqlite
 
 # Nom de la table qui stocke les messages en attente à destination du bus.
 backup_table_to_bus = tobus
@@ -54,11 +54,11 @@ accepted_commands = collect, downtime, hls
 
 # Emplacement du socket utilisé pour recevoir des messages de Nagios.
 # Si absent, il ne sera pas possible de recevoir les notifications de Nagios.
-listen_unix = /var/lib/vigilo/connector-nagios/send.sock
+listen_unix = @LOCALSTATEDIR@/lib/vigilo/connector-nagios/send.sock
 
 # Emplacement du pipe utilisé pour envoyer des commandes à Nagios.
 # Si absent, il ne sera pas possible d'envoyer des commandes à Nagios.
-#nagios_pipe = /var/spool/nagios/nagios.cmd
+nagios_pipe = /var/spool/nagios/nagios.cmd
 
 
 
@@ -77,6 +77,11 @@ keys=simpleFormatter
 level=DEBUG
 handlers=consoleHandler
  
+[logger_multiprocessing]
+level=DEBUG
+handlers=consoleHandler
+qualname=multiprocessing
+
 [logger_twisted]
 level=DEBUG
 handlers=
