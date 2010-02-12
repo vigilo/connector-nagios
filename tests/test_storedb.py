@@ -15,6 +15,7 @@ import os, os.path
 from socket import socket, AF_UNIX, SOCK_STREAM
 
 from vigilo.common.conf import settings
+settings.load_module(__name__)
 
 NS_EVENT = 'http://www.projet-vigilo.org/xmlns/event1'
 NS_PERF = 'http://www.projet-vigilo.org/xmlns/perf1'

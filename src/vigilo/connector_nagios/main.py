@@ -24,8 +24,7 @@ class ConnectorServiceMaker(object):
         from vigilo.connector.sockettonodefw import SocketToNodeForwarder
         from vigilo.pubsub.checknode import VerificationNode
         from vigilo.common.conf import settings
-        # TODO: fix this by adding a load_module() method on the settings class
-        settings.load_file("/etc/vigilo/connector-nagios/settings.ini")
+        settings.load_module(__name__)
         from vigilo.common.logging import get_logger
         import os
         LOGGER = get_logger(__name__)
