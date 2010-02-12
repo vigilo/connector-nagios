@@ -41,4 +41,3 @@ clean: clean_python
 include ../glue/Makefile.common
 lint: lint_pylint
 tests: tests_nose
-
