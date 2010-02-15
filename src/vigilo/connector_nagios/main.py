@@ -20,13 +20,15 @@ class ConnectorServiceMaker(object):
 
     def makeService(self):
         """ the service that wraps everything the connector needs. """ 
+        import os
+
+        from vigilo.common.conf import settings
+        settings.load_module(__name__)
+
         from vigilo.connector_nagios.xmpptopipefw import XMPPToPipeForwarder
         from vigilo.connector.sockettonodefw import SocketToNodeForwarder
         from vigilo.pubsub.checknode import VerificationNode
-        from vigilo.common.conf import settings
-        settings.load_module(__name__)
         from vigilo.common.logging import get_logger
-        import os
         LOGGER = get_logger(__name__)
 
         xmpp_client = client.XMPPClient(
