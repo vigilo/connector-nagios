@@ -1,3 +1,4 @@
 # Default configuration for Vigilo-Nagios connector
 
 #OPTIONS="--daemon"
+#USER="vigilo-connector-nagios"

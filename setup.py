@@ -53,6 +53,7 @@ setup(name='vigilo-connector-nagios',
                     (os.path.join(sysconfdir, "vigilo/connector-nagios"),
                         ["settings.ini"]),
                     (os.path.join(localstatedir, "lib/vigilo/connector-nagios"), []),
+                    (os.path.join(localstatedir, "run/vigilo-connector-nagios"), []),
                    ],
         )
 

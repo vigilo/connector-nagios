@@ -51,9 +51,13 @@ sed -i -e 's/^Twisted$/Twisted_Words/' $RPM_BUILD_ROOT%{_prefix}/lib*/python*/si
 # Listed explicitely in %%files as %%config:
 grep -v '^%{_sysconfdir}/%{name}/' INSTALLED_FILES \
 	| grep -v '^%{_sysconfdir}/sysconfig' \
+	| grep -v '^%{_localstatedir}/run' \
 	> INSTALLED_FILES.filtered
 mv -f INSTALLED_FILES.filtered INSTALLED_FILES
 
+
+%pre
+%_pre_useradd %{name} $1 %{name} %{_localstatedir}/lib/vigilo/%{module} /bin/false
 
 %post
 %_post_service %{name}
@@ -71,6 +75,7 @@ rm -rf $RPM_BUILD_ROOT
 %dir %{_sysconfdir}/vigilo/
 %config(noreplace) %{_sysconfdir}/vigilo/%{module}
 %config(noreplace) %{_sysconfdir}/sysconfig/*
+%attr(-,%{name},%{name}) %{_localstatedir}/run/%{name}
 
 
 %changelog
