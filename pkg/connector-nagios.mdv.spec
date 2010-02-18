@@ -57,7 +57,7 @@ mv -f INSTALLED_FILES.filtered INSTALLED_FILES
 
 
 %pre
-%_pre_useradd %{name} $1 %{name} %{_localstatedir}/lib/vigilo/%{module} /bin/false
+%_pre_useradd %{name} %{_localstatedir}/lib/vigilo/%{module} /bin/false
 
 %post
 %_post_service %{name}
