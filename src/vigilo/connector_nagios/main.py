@@ -116,6 +116,7 @@ def do_main_program():
     reactor.run()
 
 def get_tac_path():
+    # TODO: ajouter un test unitaire pour ça
     from vigilo import connector_nagios
     print os.path.join( os.path.dirname(connector_nagios.__file__),
                         "twisted_service.py")
