@@ -69,7 +69,7 @@ keys=root,twisted
 keys=syslog,console
 
 [formatters]
-keys=syslogFormatter
+keys=consoleFormatter,syslogFormatter
 
 [logger_root]
 level=DEBUG

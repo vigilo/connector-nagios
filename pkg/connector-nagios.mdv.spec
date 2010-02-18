@@ -20,6 +20,7 @@ Requires:   python-setuptools
 Requires:   vigilo-common vigilo-pubsub vigilo-connector
 Requires:   python-daemon
 Requires:   python-twisted-words python-twisted-names wokkel
+Requires:   nagios
 
 Requires(pre): rpm-helper
 
@@ -51,13 +52,14 @@ sed -i -e 's/^Twisted$/Twisted_Words/' $RPM_BUILD_ROOT%{_prefix}/lib*/python*/si
 # Listed explicitely in %%files as %%config:
 grep -v '^%{_sysconfdir}/%{name}/' INSTALLED_FILES \
 	| grep -v '^%{_sysconfdir}/sysconfig' \
-	| grep -v '^%{_localstatedir}/run' \
+	| grep -v '^%{_localstatedir}' \
 	> INSTALLED_FILES.filtered
 mv -f INSTALLED_FILES.filtered INSTALLED_FILES
 
 
 %pre
 %_pre_useradd %{name} %{_localstatedir}/lib/vigilo/%{module} /bin/false
+%_pre_groupadd nagios %{name}
 
 %post
 %_post_service %{name}
@@ -75,6 +77,8 @@ rm -rf $RPM_BUILD_ROOT
 %dir %{_sysconfdir}/vigilo/
 %config(noreplace) %{_sysconfdir}/vigilo/%{module}
 %config(noreplace) %{_sysconfdir}/sysconfig/*
+%dir %{_localstatedir}/lib/vigilo
+%attr(-,%{name},%{name}) %{_localstatedir}/lib/vigilo/%{module}
 %attr(-,%{name},%{name}) %{_localstatedir}/run/%{name}
 
 
