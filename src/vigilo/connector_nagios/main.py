@@ -109,11 +109,16 @@ class ConnectorServiceMaker(object):
 
 def do_main_program():
     """ main function designed to launch the program """
-    application = service.Application('Twisted PubSub component')
+    application = service.Application('Vigilo Connector for Nagios')
     conn_service = ConnectorServiceMaker().makeService()
     conn_service.setServiceParent(application)
     app.startApplication(application, False)
     reactor.run()
+
+def get_tac_path():
+    from vigilo import connector_nagios
+    print os.path.join( os.path.dirname(connector_nagios.__file__),
+                        "twisted_service.py")
 
 def main(*args):
     """ main function designed to launch the program """

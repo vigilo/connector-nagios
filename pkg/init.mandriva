@@ -16,13 +16,14 @@
 ### END INIT INFO
 
 PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
-DAEMON=/usr/bin/vigilo-connector-nagios
+DAEMON=/usr/bin/twistd
+TAC=/usr/bin/vigilo-connector-nagios-tac
 NAME=vigilo-connector-nagios
 LOCK_FILE=/var/lock/subsys/$NAME
 
 USER=$NAME
 PID_FILE=/var/run/$NAME/$NAME.pid
-OPTIONS="--daemon"
+OPTIONS=""
 
 if [ -f /etc/sysconfig/$NAME ] ; then
 	. /etc/sysconfig/$NAME
@@ -39,7 +40,7 @@ start() {
 	[ -f $LOCK_FILE ] && return
 
 	echo -n "Starting $NAME: "
-	daemon --user $USER $DAEMON -p $PID_FILE $OPTIONS
+	daemon --user $USER $DAEMON --pidfile $PID_FILE -y `$TAC | tail -n 1` $OPTIONS
 	RETVAL=$?
 	echo
 	[ $RETVAL -eq 0 ] && touch $LOCK_FILE
@@ -70,7 +71,7 @@ case "$1" in
 		stop
 	;;
 	status)
-		status $NAME
+		status -p $PID_FILE $NAME
 	;;
 	reload)
 		reload
