@@ -135,6 +135,9 @@ class XMPPToPipeForwarder(XMPPHandler):
         @type  msg: Xml object
 
         """
+        from vigilo.common.conf import settings
+        settings.load_module(__name__)
+
         # It should only be one body
         # Il ne devrait y avoir qu'un seul corps de message (body)
         bodys = [element for element in msg.elements()

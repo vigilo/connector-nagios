@@ -1,14 +1,15 @@
 # vim: set fileencoding=utf-8 sw=4 ts=4 et :
 """ Nagios connector Pubsub client. """
 from __future__ import absolute_import, with_statement
+import os
 
 from twisted.application import app, service
 from twisted.internet import reactor
 from twisted.words.protocols.jabber.jid import JID
-
-
 from wokkel import client
+
 from vigilo.common.gettext import translate
+
 _ = translate(__name__)
 
 class ConnectorServiceMaker(object):
@@ -20,16 +21,15 @@ class ConnectorServiceMaker(object):
 
     def makeService(self):
         """ the service that wraps everything the connector needs. """ 
-        import os
-
         from vigilo.common.conf import settings
         settings.load_module(__name__)
+
+        from vigilo.common.logging import get_logger
+        LOGGER = get_logger(__name__)
 
         from vigilo.connector_nagios.xmpptopipefw import XMPPToPipeForwarder
         from vigilo.connector.sockettonodefw import SocketToNodeForwarder
         from vigilo.pubsub.checknode import VerificationNode
-        from vigilo.common.logging import get_logger
-        LOGGER = get_logger(__name__)
 
         xmpp_client = client.XMPPClient(
                 JID(settings['bus']['jid']),
@@ -107,7 +107,7 @@ class ConnectorServiceMaker(object):
         xmpp_client.setServiceParent(root_service)
         return root_service
 
-def do_main_programm():
+def do_main_program():
     """ main function designed to launch the program """
     application = service.Application('Twisted PubSub component')
     conn_service = ConnectorServiceMaker().makeService()
@@ -115,14 +115,12 @@ def do_main_programm():
     app.startApplication(application, False)
     reactor.run()
 
-def main():
+def main(*args):
     """ main function designed to launch the program """
 
     from vigilo.common.daemonize import daemonize
-    context = daemonize()
-    with context:
-        do_main_programm()
-
+    with daemonize():
+        do_main_program()
 
 if __name__ == '__main__':
     main()
