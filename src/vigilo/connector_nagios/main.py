@@ -115,18 +115,13 @@ def do_main_program():
     app.startApplication(application, False)
     reactor.run()
 
-def get_tac_path():
-    # TODO: ajouter un test unitaire pour ça
-    from vigilo import connector_nagios
-    print os.path.join( os.path.dirname(connector_nagios.__file__),
-                        "twisted_service.py")
-
 def main(*args):
-    """ main function designed to launch the program """
-
-    from vigilo.common.daemonize import daemonize
-    with daemonize():
-        do_main_program()
+    """Lancement avec Twistd"""
+    import sys
+    tac_file = os.path.join(os.path.dirname(__file__), "twisted_service.py")
+    sys.argv[1:1] = ["-y", tac_file]
+    from twisted.scripts.twistd import run
+    run()
 
 if __name__ == '__main__':
     main()

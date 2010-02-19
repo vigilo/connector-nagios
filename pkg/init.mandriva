@@ -16,8 +16,7 @@
 ### END INIT INFO
 
 PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
-DAEMON=/usr/bin/twistd
-TAC=/usr/bin/vigilo-connector-nagios-tac
+DAEMON=/usr/bin/vigilo-connector-nagios
 NAME=vigilo-connector-nagios
 LOCK_FILE=/var/lock/subsys/$NAME
 
@@ -40,7 +39,7 @@ start() {
 	[ -f $LOCK_FILE ] && return
 
 	echo -n "Starting $NAME: "
-	daemon --user $USER $DAEMON --pidfile $PID_FILE -y `$TAC | tail -n 1` $OPTIONS
+	daemon --user $USER $DAEMON --pidfile $PID_FILE $OPTIONS
 	RETVAL=$?
 	echo
 	[ $RETVAL -eq 0 ] && touch $LOCK_FILE
