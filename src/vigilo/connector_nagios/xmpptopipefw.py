@@ -39,7 +39,7 @@ class XMPPToPipeForwarder(XMPPHandler):
         # There's probably a way to configure it (on_sub vs on_sub_and_presence)
         # but the spec defaults to not sending subscriptions without presence.
         self.send(xmppim.AvailablePresence())
-        LOGGER.info(_('ConnectionInitialized'))
+        LOGGER.debug(_('Connection initialized'))
 
 
 
@@ -120,8 +120,8 @@ class XMPPToPipeForwarder(XMPPHandler):
             pipe.close()
             return True
         except OSError, e:
-            LOGGER.error(_('Message impossible to forward %(error_message)s' +
-                           ', the message is stored for later reemission') % \
+            LOGGER.error(_('Unable to forward message %(error_message)s, '
+                           'this message is stored for later reemission.') % \
                             {'error_message': str(e)})
             self.retry.store(msg)
             self.__backuptoempty = True

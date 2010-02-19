@@ -1,0 +1,59 @@
+# French translations for PACKAGE package.
+# Copyright (C) 2010 THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# Vigilo language team <contact@projet-vigilo.org>, 2010.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: vigilo.connector-nagios\n"
+"Report-Msgid-Bugs-To: contact@projet-vigilo.org\n"
+"POT-Creation-Date: 2010-02-19 11:00+0100\n"
+"PO-Revision-Date: 2010-02-19 11:00+0100\n"
+"Last-Translator: Automatically generated\n"
+"Language-Team: none\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+
+#: src/vigilo/connector_nagios/xmpptopipefw.py:42
+msgid "Connection initialized"
+msgstr "Connexion initialisée"
+
+#: src/vigilo/connector_nagios/xmpptopipefw.py:123
+#, python-format
+msgid "Unable to forward message %(error_message)s, "
+"this message is stored for later reemission."
+msgstr "Impossible de transférer le message %(error_message)s, "
+"ce message est conservé en vue d'une future réémission."
+
+#: src/vigilo/connector_nagios/xmpptopipefw.py:152
+#, python-format
+msgid "Command type (type: '%s') unrecognized or disallowed by policy"
+msgstr "Type de commande (type: '%s') non "
+"reconnu ou bloqué par la politique de sécurité"
+
+#: src/vigilo/connector_nagios/xmpptopipefw.py:156
+#, python-format
+msgid "Chat message to forward: %s"
+msgstr "Message à transférer : %s"
+
+#: src/vigilo/connector_nagios/main.py:69
+#, python-format
+msgid "Directory not found: '%(dir)s'"
+msgstr "Répertoire introuvable : '%(dir)s'"
+
+#: src/vigilo/connector_nagios/main.py:74
+#, python-format
+msgid "Directory not readable: '%(dir)s'"
+msgstr "Lecture impossible dans le répertoire : '%(dir)s'"
+
+#: src/vigilo/connector_nagios/main.py:79
+#, python-format
+msgid "Directory not writable: '%(dir)s'"
+msgstr "Écriture impossible dans le répertoire : '%(dir)s'"
+
+#: src/vigilo/connector_nagios/main.py:84
+#, python-format
+msgid "Directory not executable: '%(dir)s'"
+msgstr "Execution impossible depuis le répertoire : '%(dir)s'"
