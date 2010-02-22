@@ -28,7 +28,7 @@ class TestDBRetry(unittest.TestCase):
         """Stockage local d'un message lorsque le bus est indisponible."""
 
         # Demarrage en tâche de fond du connector-nagios.
-        commandline = "%(WD)s/bin/connector-nagios" % {'WD': os.getcwd()}
+        commandline = ["%s/bin/vigilo-connector-nagios" % os.getcwd(), "-n", "-l", "-"]
 
         adr_socket = settings['connector-nagios']['listen_unix']
 

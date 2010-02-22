@@ -50,7 +50,7 @@ event = /home/localhost/connector-nagios/event
 # Liste des types de messages XML <command> que le connecteur-nagios
 # acceptera de transmettre à Nagios, séparés par des virgules.
 # Si la liste est vide, mettre uniquement une virgule.
-accepted_commands = collect, downtime, hls
+accepted_commands = PROCESS_SERVICE_CHECK_RESULT, PROCESS_HOST_CHECK_RESULT, SCHEDULE_HOST_DOWNTIME, SCHEDULE_SVC_DOWNTIME, SCHEDULE_SVC_CHECK, SCHEDULE_HOST_CHECK, SCHEDULE_HOST_SVC_CHECKS
 
 # Emplacement du socket utilisé pour recevoir des messages de Nagios.
 # Si absent, il ne sera pas possible de recevoir les notifications de Nagios.

@@ -92,18 +92,22 @@ class XMPPToPipeForwarder(XMPPHandler):
         """
         self.sendQueuedMessages()
     
-    def messageForward(self, msg):
+    def messageForward(self, cmd_timestamp, cmd_type, cmd_value):
         """
         function to forward the message to the pipe
         @param msg: message to forward
         @type msg: C{str}
         """
 
+        # TODO: ajouter des tests unitaires
+        msg = "[%s] %s;%s" % (cmd_timestamp, cmd_type, cmd_value)
         if self.__backuptoempty and not self.__emptyingbackup:
             self.sendQueuedMessages()
         try:
             # testing there is a pipe (FIFO) which exist.
             if not stat.S_ISFIFO(os.stat(self.pipe_filename).st_mode):
+                LOGGER.error(_('The configured nagios command pipe is not '
+                        'a FIFO. Storing message for later.'))
                 self.retry.store(msg)
                 self.__backuptoempty = True
                 return
@@ -115,7 +119,8 @@ class XMPPToPipeForwarder(XMPPHandler):
 #  * anything else (eg. pscwatch) which writes to the file will be writing into
 #  * the middle of our commands.
 #  */
-            pipe = open(self.pipe_filename, 'w')
+            LOGGER.debug(_("Writing to %s: %s") % (self.pipe_filename, msg))
+            pipe = open(self.pipe_filename, 'a')
             pipe.write(msg + '\n')
             pipe.close()
             return True
@@ -135,6 +140,7 @@ class XMPPToPipeForwarder(XMPPHandler):
         @type  msg: Xml object
 
         """
+        # TODO: ajouter des tests unitaires
         from vigilo.common.conf import settings
         settings.load_module(__name__)
 
@@ -147,12 +153,20 @@ class XMPPToPipeForwarder(XMPPHandler):
             for data in b.elements():
                 # the data we need is just underneath
                 # les données dont on a besoin sont juste en dessous
-                if data.name != 'command' and data['type'] not in \
-                    settings['connector-nagios']['accepted_commands']:
-                    LOGGER.error(_("Command type (type: '%s') " 
-                        "unrecognized or disallowed by policy") % data['type'])
+                if data.name != 'command':
+                    LOGGER.error(_("Unrecognized command type: '%s'")
+                                    % data.type)
                     continue
-                for raw in data.children:
-                    LOGGER.debug(_('Chat message to forward: %s') % raw)
-                    self.messageForward(raw)
+                cmd_timestamp = int(str(data.timestamp))
+                cmd_type = str(data.type)
+                cmd_value = str(data.value)
+                if cmd_type not in \
+                    settings['connector-nagios']['accepted_commands']:
+                    print settings['connector-nagios']['accepted_commands']
+                    LOGGER.error(_("Command type (type: '%s') " 
+                            "disallowed by policy") % data.type)
+                    continue
+                LOGGER.debug(_('Command message to forward: ts=%s type=%s val=%s') \
+                        % (cmd_timestamp, cmd_type, cmd_value) )
+                self.messageForward(cmd_timestamp, cmd_type, cmd_value)
 
