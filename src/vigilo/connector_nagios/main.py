@@ -63,30 +63,41 @@ class ConnectorServiceMaker(object):
         pw = settings['connector-nagios'].get('nagios_pipe', None)
         sr = settings['connector-nagios'].get('listen_unix', None)
 
-        for i in bkpfile, pw, sr:
-            if i != ':memory:' and i is not None:
-                if not os.access(os.path.dirname(i), os.F_OK):
-                    msg = _("Directory not found: '%(dir)s'") % \
-                            {'dir': os.path.dirname(i)}
-                    LOGGER.error(msg)
-                    raise OSError(msg)
-                if not os.access(os.path.dirname(i), os.R_OK):
-                    msg = _("Directory not readable: '%(dir)s'") % \
-                            {'dir': os.path.dirname(i)}
-                    LOGGER.error(msg)
-                    raise OSError(msg)
-                if not os.access(os.path.dirname(i), os.W_OK):
-                    msg = _("Directory not writable: '%(dir)s'") % \
-                            {'dir': os.path.dirname(i)}
-                    LOGGER.error(msg)
-                    raise OSError(msg)
-                if not os.access(os.path.dirname(i), os.X_OK):
-                    msg = _("Directory not executable: '%(dir)s'") % \
-                            {'dir': os.path.dirname(i)}
-                    LOGGER.error(msg)
-                    raise OSError(msg)
+        if bkpfile != ':memory:':
+            if not os.path.exists(os.path.dirname(bkpfile)):
+                msg = _("Directory not found: '%(dir)s'") % \
+                        {'dir': os.path.dirname(bkpfile)}
+                LOGGER.error(msg)
+                raise OSError(msg)
+            if not os.access(os.path.dirname(bkpfile), os.R_OK | os.W_OK | os.X_OK):
+                msg = _("Wrong permissions on directory: '%(dir)s'") % \
+                        {'dir': os.path.dirname(bkpfile)}
+                LOGGER.error(msg)
+                raise OSError(msg)
 
-        if pw is not None:
+        if sr:
+            if not os.path.exists(os.path.dirname(sr)):
+                msg = _("Directory not found: '%(dir)s'") % \
+                        {'dir': os.path.dirname(sr)}
+                LOGGER.error(msg)
+                raise OSError(msg)
+            if not os.access(os.path.dirname(sr), os.R_OK | os.W_OK | os.X_OK):
+                msg = _("Wrong permissions on directory: '%(dir)s'") % \
+                        {'dir': os.path.dirname(sr)}
+                LOGGER.error(msg)
+                raise OSError(msg)
+
+        if pw:
+            if os.path.exists(pw) and not os.access(pw, os.W_OK):
+                msg = _("Can't write to the Nagios command pipe: '%s'") % pw
+                LOGGER.error(msg)
+                raise OSError(msg)
+            if not os.access(os.path.dirname(pw), os.X_OK):
+                msg = _("Can't traverse directory: '%(dir)s'") % \
+                        {'dir': os.path.dirname(pw)}
+                LOGGER.error(msg)
+                raise OSError(msg)
+
             message_consumer = XMPPToPipeForwarder(
                     pw,
                     bkpfile,

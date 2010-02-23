@@ -1,7 +1,7 @@
 %define module  connector-nagios
 %define name    vigilo-%{module}
 %define version 1.0
-%define release 1
+%define release 3
 
 Name:       %{name}
 Summary:    Vigilo-Nagios connector
@@ -57,8 +57,8 @@ mv -f INSTALLED_FILES.filtered INSTALLED_FILES
 
 
 %pre
-%_pre_useradd %{name} %{_localstatedir}/lib/vigilo/%{module} /bin/false
-%_pre_groupadd nagios %{name}
+%_pre_useradd vigilo-nagios %{_localstatedir}/lib/vigilo/%{module} /bin/false
+%_pre_groupadd nagios vigilo-nagios
 
 %post
 %_post_service %{name}
@@ -77,8 +77,8 @@ rm -rf $RPM_BUILD_ROOT
 %config(noreplace) %{_sysconfdir}/vigilo/%{module}
 %config(noreplace) %{_sysconfdir}/sysconfig/*
 %dir %{_localstatedir}/lib/vigilo
-%attr(-,%{name},%{name}) %{_localstatedir}/lib/vigilo/%{module}
-%attr(-,%{name},%{name}) %{_localstatedir}/run/%{name}
+%attr(-,vigilo-nagios,vigilo-nagios) %{_localstatedir}/lib/vigilo/%{module}
+%attr(-,vigilo-nagios,vigilo-nagios) %{_localstatedir}/run/%{name}
 
 
 %changelog

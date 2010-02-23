@@ -4,4 +4,4 @@
 #OPTIONS=""
 
 # User to run as
-#USER="vigilo-connector-nagios"
+#USER="vigilo-nagios"

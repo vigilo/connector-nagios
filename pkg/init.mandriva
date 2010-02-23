@@ -20,7 +20,7 @@ DAEMON=/usr/bin/vigilo-connector-nagios
 NAME=vigilo-connector-nagios
 LOCK_FILE=/var/lock/subsys/$NAME
 
-USER=$NAME
+USER=vigilo-nagios
 PID_FILE=/var/run/$NAME/$NAME.pid
 OPTIONS=""
 
