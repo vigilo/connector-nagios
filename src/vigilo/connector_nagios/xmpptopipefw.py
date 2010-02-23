@@ -10,6 +10,7 @@ from vigilo.common.logging import get_logger
 from vigilo.connector.store import DbRetry
 import os
 import stat
+import fcntl
 from wokkel.subprotocols import XMPPHandler
 from wokkel import xmppim
 
@@ -120,9 +121,12 @@ class XMPPToPipeForwarder(XMPPHandler):
 #  * the middle of our commands.
 #  */
             LOGGER.debug(_("Writing to %s: %s") % (self.pipe_filename, msg))
-            pipe = open(self.pipe_filename, 'a')
-            pipe.write(msg + '\n')
-            pipe.close()
+            # cannot open in append mode, since that causes a seek
+            pipe = os.open(self.pipe_filename, os.O_WRONLY)
+            fcntl.flock(pipe, fcntl.LOCK_EX)
+            os.write(pipe, msg + '\n')
+            fcntl.flock(pipe, fcntl.LOCK_UN)
+            os.close(pipe)
             return True
         except OSError, e:
             LOGGER.error(_('Unable to forward message %(error_message)s, '
