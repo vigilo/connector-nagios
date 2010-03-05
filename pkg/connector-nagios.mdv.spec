@@ -1,7 +1,7 @@
 %define module  connector-nagios
 %define name    vigilo-%{module}
-%define version 1.0
-%define release 3
+%define version 1.1
+%define release 1%{?svn}
 
 Name:       %{name}
 Summary:    Vigilo-Nagios connector
@@ -17,7 +17,7 @@ BuildRequires:   python-setuptools
 
 Requires:   python >= 2.5
 Requires:   python-setuptools
-Requires:   vigilo-common vigilo-pubsub vigilo-connector
+Requires:   vigilo-common vigilo-connector
 Requires:   nagios
 
 Requires(pre): rpm-helper
@@ -44,16 +44,6 @@ make install \
 	LOCALSTATEDIR=%{_localstatedir} \
 	PYTHON=%{_bindir}/python
 
-# Mandriva splits Twisted
-sed -i -e 's/^Twisted$/Twisted_Words/' $RPM_BUILD_ROOT%{_prefix}/lib*/python*/site-packages/vigilo_connector_nagios-*-py*.egg-info/requires.txt
-
-# Listed explicitely in %%files as %%config:
-grep -v '^%{_sysconfdir}/%{name}/' INSTALLED_FILES \
-	| grep -v '^%{_sysconfdir}/sysconfig' \
-	| grep -v '^%{_localstatedir}' \
-	> INSTALLED_FILES.filtered
-mv -f INSTALLED_FILES.filtered INSTALLED_FILES
-
 
 %pre
 %_pre_useradd vigilo-nagios %{_localstatedir}/lib/vigilo/%{module} /bin/false
@@ -69,12 +59,15 @@ mv -f INSTALLED_FILES.filtered INSTALLED_FILES
 %clean
 rm -rf $RPM_BUILD_ROOT
 
-%files -f INSTALLED_FILES
+%files
 %defattr(-,root,root)
 %doc COPYING
+%{_bindir}/%{name}
+%{_initrddir}/%{name}
 %dir %{_sysconfdir}/vigilo/
 %config(noreplace) %{_sysconfdir}/vigilo/%{module}
 %config(noreplace) %{_sysconfdir}/sysconfig/*
+%{python_sitelib}/*
 %dir %{_localstatedir}/lib/vigilo
 %attr(-,vigilo-nagios,vigilo-nagios) %{_localstatedir}/lib/vigilo/%{module}
 %attr(-,vigilo-nagios,vigilo-nagios) %{_localstatedir}/run/%{name}

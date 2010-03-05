@@ -24,13 +24,9 @@ setup(name='vigilo-connector-nagios',
         +'   - nagios\n',
         install_requires=[
             # dashes become underscores
-            # order is important (wokkel before Twisted)
             'setuptools',
             'vigilo-common',
-            'vigilo-pubsub',
             'vigilo-connector',
-            'wokkel',
-            'Twisted',
             ],
         namespace_packages = [
             'vigilo',
