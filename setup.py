@@ -12,6 +12,21 @@ tests_require = [
     'pylint',
 ]
 
+def install_i18n(i18ndir, destdir):
+    data_files = []
+    langs = []
+    for f in os.listdir(i18ndir):
+        if os.path.isdir(os.path.join(i18ndir, f)) and not f.startswith("."):
+            langs.append(f)
+    for lang in langs:
+        for f in os.listdir(os.path.join(i18ndir, lang, "LC_MESSAGES")):
+            if f.endswith(".mo"):
+                data_files.append(
+                        (os.path.join(destdir, lang, "LC_MESSAGES"),
+                         [os.path.join(i18ndir, lang, "LC_MESSAGES", f)])
+                )
+    return data_files
+
 setup(name='vigilo-connector-nagios',
         version='0.1',
         author='Vigilo Team',
@@ -49,6 +64,6 @@ setup(name='vigilo-connector-nagios',
                         ["settings.ini"]),
                     (os.path.join(localstatedir, "lib/vigilo/connector-nagios"), []),
                     (os.path.join(localstatedir, "run/vigilo-connector-nagios"), []),
-                   ],
+                   ] + install_i18n("i18n", "/usr/share/locale"),
         )
 
