@@ -93,7 +93,7 @@ class XMPPToPipeForwarder(XMPPHandler):
         """
         self.sendQueuedMessages()
     
-    def messageForward(self, cmd_timestamp, cmd_type, cmd_value):
+    def messageForward(self, cmd_timestamp, cmd_name, cmd_value):
         """
         function to forward the message to the pipe
         @param msg: message to forward
@@ -101,7 +101,7 @@ class XMPPToPipeForwarder(XMPPHandler):
         """
 
         # TODO: ajouter des tests unitaires
-        msg = "[%s] %s;%s" % (cmd_timestamp, cmd_type, cmd_value)
+        msg = "[%s] %s;%s" % (cmd_timestamp, cmd_name, cmd_value)
         if self.__backuptoempty and not self.__emptyingbackup:
             self.sendQueuedMessages()
         try:
@@ -158,19 +158,19 @@ class XMPPToPipeForwarder(XMPPHandler):
                 # the data we need is just underneath
                 # les données dont on a besoin sont juste en dessous
                 if data.name != 'command':
-                    LOGGER.error(_("Unrecognized command type: '%s'")
-                                    % data.type)
+                    LOGGER.error(_("Unrecognized message type: '%s'")
+                                    % data.cmdname)
                     continue
                 cmd_timestamp = int(str(data.timestamp))
-                cmd_type = str(data.type)
+                cmd_name = str(data.cmdname)
                 cmd_value = str(data.value)
-                if cmd_type not in \
+                if cmd_name not in \
                     settings['connector-nagios']['accepted_commands']:
                     print settings['connector-nagios']['accepted_commands']
-                    LOGGER.error(_("Command type (type: '%s') " 
-                            "disallowed by policy") % data.type)
+                    LOGGER.error(_("Command '%s' disallowed by policy")
+                                 % data.cmdname)
                     continue
-                LOGGER.debug(_('Command message to forward: ts=%s type=%s val=%s') \
-                        % (cmd_timestamp, cmd_type, cmd_value) )
-                self.messageForward(cmd_timestamp, cmd_type, cmd_value)
+                LOGGER.debug(_('Command message to forward: ts=%s name=%s val=%s') \
+                        % (cmd_timestamp, cmd_name, cmd_value) )
+                self.messageForward(cmd_timestamp, cmd_name, cmd_value)
 
