@@ -12,78 +12,63 @@ import time
 import sqlite3
 from subprocess import Popen, PIPE
 import os, os.path
+import tempfile
+import shutil
 from socket import socket, AF_UNIX, SOCK_STREAM
+
+from twisted.words.xish import domish
 
 from vigilo.common.conf import settings
 settings.load_module(__name__)
 
-NS_EVENT = 'http://www.projet-vigilo.org/xmlns/event1'
-NS_PERF = 'http://www.projet-vigilo.org/xmlns/perf1'
+from vigilo.connector.sockettonodefw import SocketToNodeForwarder
+from vigilo.connector.converttoxml import NS_EVENT, NS_PERF
 
 
 class TestDBRetry(unittest.TestCase):
     """Teste la sauvegarde locale de messages en cas d'erreur."""
 
+    def setUp(self):
+        self.tmpdir = tempfile.mkdtemp(prefix="test-conn-nagios-dbretry-")
+
+    def tearDown(self):
+        shutil.rmtree(self.tmpdir)
+
     def test_store_message(self):
         """Stockage local d'un message lorsque le bus est indisponible."""
 
-        # Demarrage en tâche de fond du connector-nagios.
-        commandline = ["%s/bin/vigilo-connector-nagios" % os.getcwd(), "-n", "-l", "-"]
+        base = os.path.join(self.tmpdir, "backup.sqlite")
+        tobus_table = "tobus"
+        publisher = SocketToNodeForwarder(
+                os.path.join(self.tmpdir, "read.sock"),
+                base, tobus_table,
+                settings.get('publications', {}),
+                "pubsub.example.com",
+        )
 
-        adr_socket = settings['connector-nagios']['listen_unix']
+        # récupération du nombre de messages dans la table avant envoi
+        conn = sqlite3.connect(base)
+        cur = conn.cursor()
+        request = 'SELECT COUNT(*) FROM ' + tobus_table
+        cur.execute(request)
+        before = cur.fetchone()[0]
 
-        # suppression du fichier socket au cas où un test précédent
-        # l'aurait laissé trainer.
-        if os.path.exists(adr_socket):
-            remove(adr_socket)
+        # Preparation du message
+        msg = domish.Element((NS_PERF, 'perf'))
+        msg.addElement('test', content="this is a test")
 
-        # Mise en tache de fond du connector nagios.
-        p = Popen(commandline, bufsize=1, stdin=PIPE, stdout=PIPE, env=os.environ)
+        # Envoi du message
+        publisher.publishXml(msg)
 
-        # attente que la commande précédente s'exécute
-        time.sleep(2)
-        pid = p.pid
+        # récupération du nombre de messages dans la table apres envoi
+        cur.execute(request)
+        after = cur.fetchone()[0]
+        cur.close()
+        conn.close()
 
-        raw_av = raw_ap = 0
+        self.assertEqual(after, before + 1)
 
-        try:
-            # connection à la database puis récupération du nombre d'enregistrement
-            base = settings['connector']['backup_file']
 
-            conn = sqlite3.connect(base)
-            cur = conn.cursor()
-            # récupération du nombre de messages dans la table avant send
-            requete = 'select count(*) from ' + \
-                settings['connector']['backup_table_to_bus']
-            cur.execute(requete)
-            raw_av = cur.fetchone()[0]
-
-            # Connexion à la socket
-            tsocket = socket(AF_UNIX, SOCK_STREAM)
-            tsocket.connect(adr_socket) 
-            dico = {'ns': NS_PERF}    
-            b = tsocket.send("""<perf xmlns='%(ns)s'><timestamp>1165939739</timestamp><host>serveur1.example.com</host><datasource>Load</datasource><value>10</value></perf>\n""" % dico)
-            time.sleep(1)
-
-            # récupération du nombre de messages dans la table après send
-            cur.execute(requete)
-            raw_ap = cur.fetchone()[0]
-
-            tsocket.close()
-            cur.close()
-            conn.close()
-
-        # TODO Changer pour capturer uniquement les exceptions pertinentes.
-        except:
-            pass
-
-        # On veut savoir ce qu'il sait passé dans le processus fils.
-        os.kill(pid, signal.SIGTERM)    # suppression du process connector nagios
-        print p.stdout.read()
-
-        # vérification que le message a été sauvegardé
-        self.assertEqual(raw_av + 1, raw_ap)      
-    
 if __name__ == "__main__": 
     unittest.main()
 
