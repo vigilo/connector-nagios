@@ -166,11 +166,18 @@ class XMPPToPipeForwarder(XMPPHandler):
                 cmd_value = str(data.value)
                 if cmd_name not in \
                     settings['connector-nagios']['accepted_commands']:
-                    print settings['connector-nagios']['accepted_commands']
-                    LOGGER.error(_("Command '%s' disallowed by policy")
-                                 % data.cmdname)
+                    LOGGER.error(_("Command '%(received)s' disallowed by "
+                                "policy, accepted commands: %(accepted)r") % {
+                                    'received': data.cmdname,
+                                    'accepted': settings['connector-nagios']
+                                                        ['accepted_commands'],
+                                 })
                     continue
-                LOGGER.debug(_('Command message to forward: ts=%s name=%s val=%s') \
-                        % (cmd_timestamp, cmd_name, cmd_value) )
+                LOGGER.debug(_('Command message to forward: '
+                                'ts=%s name=%s val=%s') % (
+                                    cmd_timestamp,
+                                    cmd_name,
+                                    cmd_value,
+                                ))
                 self.messageForward(cmd_timestamp, cmd_name, cmd_value)
 
