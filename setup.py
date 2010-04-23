@@ -50,6 +50,11 @@ setup(name='vigilo-connector-nagios',
             'vigilo',
             'vigilo.connector_nagios',
             ],
+        message_extractors={
+            'src': [
+                ('**.py', 'python', None),
+            ],
+        },
         extras_require={
             'tests': tests_require,
         },

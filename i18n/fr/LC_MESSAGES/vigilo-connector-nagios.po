@@ -5,55 +5,82 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: vigilo.connector-nagios\n"
+"Project-Id-Version:  vigilo.connector-nagios\n"
 "Report-Msgid-Bugs-To: contact@projet-vigilo.org\n"
 "POT-Creation-Date: 2010-02-19 11:00+0100\n"
-"PO-Revision-Date: 2010-02-19 11:00+0100\n"
+"PO-Revision-Date: 2010-04-23 15:22+0200\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
+"Plural-Forms: nplurals=2; plural=(n > 1)\n"
 "MIME-Version: 1.0\n"
-"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+"Generated-By: Babel 0.9.4\n"
 
-#: src/vigilo/connector_nagios/xmpptopipefw.py:42
-msgid "Connection initialized"
-msgstr "Connexion initialisée"
-
-#: src/vigilo/connector_nagios/xmpptopipefw.py:123
-#, python-format
-msgid "Unable to forward message %(error_message)s, "
-"this message is stored for later reemission."
-msgstr "Impossible de transférer le message %(error_message)s, "
-"ce message est conservé en vue d'une future réémission."
-
-#: src/vigilo/connector_nagios/xmpptopipefw.py:152
-#, python-format
-msgid "Command type (type: '%s') unrecognized or disallowed by policy"
-msgstr "Type de commande (type: '%s') non "
-"reconnu ou bloqué par la politique de sécurité"
-
-#: src/vigilo/connector_nagios/xmpptopipefw.py:156
-#, python-format
-msgid "Chat message to forward: %s"
-msgstr "Message à transférer : %s"
-
-#: src/vigilo/connector_nagios/main.py:69
+#: src/vigilo/connector_nagios/main.py:68
+#: src/vigilo/connector_nagios/main.py:80
 #, python-format
 msgid "Directory not found: '%(dir)s'"
 msgstr "Répertoire introuvable : '%(dir)s'"
 
-#: src/vigilo/connector_nagios/main.py:74
+#: src/vigilo/connector_nagios/main.py:73
+#: src/vigilo/connector_nagios/main.py:85
 #, python-format
-msgid "Directory not readable: '%(dir)s'"
-msgstr "Lecture impossible dans le répertoire : '%(dir)s'"
+msgid "Wrong permissions on directory: '%(dir)s'"
+msgstr "Permissions indorrectes sur le répertoire '%(dir)s')"
 
-#: src/vigilo/connector_nagios/main.py:79
+#: src/vigilo/connector_nagios/main.py:92
 #, python-format
-msgid "Directory not writable: '%(dir)s'"
-msgstr "Écriture impossible dans le répertoire : '%(dir)s'"
+msgid "Can't write to the Nagios command pipe: '%s'"
+msgstr "Impossible d'écrire la commande sur le pipe de Nagios : '%s'"
 
-#: src/vigilo/connector_nagios/main.py:84
+#: src/vigilo/connector_nagios/main.py:96
 #, python-format
-msgid "Directory not executable: '%(dir)s'"
-msgstr "Execution impossible depuis le répertoire : '%(dir)s'"
+msgid "Can't traverse directory: '%(dir)s'"
+msgstr "Impossible de traverser le dossier : '%(dir)s'"
+
+#: src/vigilo/connector_nagios/xmpptopipefw.py:43
+msgid "Connection initialized"
+msgstr "Connexion initialisée"
+
+#: src/vigilo/connector_nagios/xmpptopipefw.py:110
+msgid ""
+"The configured nagios command pipe is not a FIFO. Storing message for "
+"later."
+msgstr ""
+"Le pipe de commande de Nagios n'est pas du type FIFO. Le message a été "
+"stocké pour une retransmission ultérieure."
+
+#: src/vigilo/connector_nagios/xmpptopipefw.py:123
+#, python-format
+msgid "Writing to %s: %s"
+msgstr "Écriture dans %s : %s"
+
+#: src/vigilo/connector_nagios/xmpptopipefw.py:132
+#, python-format
+msgid ""
+"Unable to forward message %(error_message)s, this message is stored for "
+"later reemission."
+msgstr ""
+"Impossible de transférer le message %(error_message)s, "
+"ce message est conservé en vue d'une future réémission."
+
+#: src/vigilo/connector_nagios/xmpptopipefw.py:161
+#, python-format
+msgid "Unrecognized message type: '%s'"
+msgstr "Type de message non reconnu : '%s'"
+
+#: src/vigilo/connector_nagios/xmpptopipefw.py:169
+#, python-format
+msgid ""
+"Command '%(received)s' disallowed by policy, accepted commands: "
+"%(accepted)r"
+msgstr ""
+"Commande '%(received)s' bloquée par la politique de sécurité. "
+"Commandes acceptées : %(accepted)r"
+
+#: src/vigilo/connector_nagios/xmpptopipefw.py:176
+#, python-format
+msgid "Command message to forward: ts=%s name=%s val=%s"
+msgstr "Message de commande à transférer : ts=%s name=%s val=%s"
+

@@ -1,55 +1,75 @@
-# SOME DESCRIPTIVE TITLE.
-# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
-# This file is distributed under the same license as the PACKAGE package.
-# Vigilo language team <contact@projet-vigilo.org>, 2010.
+# Translations template for vigilo-connector-nagios.
+# Copyright (C) 2010 ORGANIZATION
+# This file is distributed under the same license as the vigilo-connector-nagios
+# project.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2010.
 #
-msgid   ""
-msgstr  "Project-Id-Version: vigilo.connector-nagios\n"
-        "Report-Msgid-Bugs-To: contact@projet-vigilo.org\n"
-        "POT-Creation-Date: 2010-02-19 11:00+0100\n"
-        "PO-Revision-Date: 2010-02-19 11:00+0100\n"
-        "Last-Translator: Vigilo language team <contact@projet-vigilo.org>\n"
-        "Language-Team: Vigilo language team <contact@projet-vigilo.org>\n"
-        "MIME-Version: 1.0\n"
-        "Content-Type: text/plain; charset=UTF-8\n"
-        "Content-Transfer-Encoding: 8bit\n"
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: vigilo-connector-nagios 2.0.0\n"
+"Report-Msgid-Bugs-To: contact@projet-vigilo.org\n"
+"POT-Creation-Date: 2010-04-23 15:21+0200\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 0.9.4\n"
 
-#: src/vigilo/connector_nagios/xmpptopipefw.py:42
-msgid   "Connection initialized"
-msgstr  ""
+#: src/vigilo/connector_nagios/main.py:68 src/vigilo/connector_nagios/main.py:80
+#, python-format
+msgid "Directory not found: '%(dir)s'"
+msgstr ""
+
+#: src/vigilo/connector_nagios/main.py:73 src/vigilo/connector_nagios/main.py:85
+#, python-format
+msgid "Wrong permissions on directory: '%(dir)s'"
+msgstr ""
+
+#: src/vigilo/connector_nagios/main.py:92
+#, python-format
+msgid "Can't write to the Nagios command pipe: '%s'"
+msgstr ""
+
+#: src/vigilo/connector_nagios/main.py:96
+#, python-format
+msgid "Can't traverse directory: '%(dir)s'"
+msgstr ""
+
+#: src/vigilo/connector_nagios/xmpptopipefw.py:43
+msgid "Connection initialized"
+msgstr ""
+
+#: src/vigilo/connector_nagios/xmpptopipefw.py:110
+msgid "The configured nagios command pipe is not a FIFO. Storing message for later."
+msgstr ""
 
 #: src/vigilo/connector_nagios/xmpptopipefw.py:123
 #, python-format
-msgid   "Unable to forward message %(error_message)s, "
-		"this message is stored for later reemission."
-msgstr  ""
+msgid "Writing to %s: %s"
+msgstr ""
 
-#: src/vigilo/connector_nagios/xmpptopipefw.py:152
+#: src/vigilo/connector_nagios/xmpptopipefw.py:132
 #, python-format
-msgid   "Command type (type: '%s') unrecognized or disallowed by policy"
-msgstr  ""
+msgid ""
+"Unable to forward message %(error_message)s, this message is stored for later"
+" reemission."
+msgstr ""
 
-#: src/vigilo/connector_nagios/xmpptopipefw.py:156
+#: src/vigilo/connector_nagios/xmpptopipefw.py:161
 #, python-format
-msgid   "Chat message to forward: %s"
-msgstr  ""
+msgid "Unrecognized message type: '%s'"
+msgstr ""
 
-#: src/vigilo/connector_nagios/main.py:69
+#: src/vigilo/connector_nagios/xmpptopipefw.py:169
 #, python-format
-msgid   "Directory not found: '%(dir)s'"
-msgstr  ""
+msgid "Command '%(received)s' disallowed by policy, accepted commands: %(accepted)r"
+msgstr ""
 
-#: src/vigilo/connector_nagios/main.py:74
+#: src/vigilo/connector_nagios/xmpptopipefw.py:176
 #, python-format
-msgid   "Directory not readable: '%(dir)s'"
-msgstr  ""
+msgid "Command message to forward: ts=%s name=%s val=%s"
+msgstr ""
 
-#: src/vigilo/connector_nagios/main.py:79
-#, python-format
-msgid   "Directory not writable: '%(dir)s'"
-msgstr  ""
-
-#: src/vigilo/connector_nagios/main.py:84
-#, python-format
-msgid   "Directory not executable: '%(dir)s'"
-msgstr  ""
