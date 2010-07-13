@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # vim: set fileencoding=utf-8 sw=4 ts=4 et :
-import os
+import os, sys
 from setuptools import setup
 
 sysconfdir = os.getenv("SYSCONFDIR", "/etc")
@@ -69,6 +69,6 @@ setup(name='vigilo-connector-nagios',
                         ["settings.ini"]),
                     (os.path.join(localstatedir, "lib/vigilo/connector-nagios"), []),
                     (os.path.join(localstatedir, "run/vigilo-connector-nagios"), []),
-                   ] + install_i18n("i18n", "/usr/share/locale"),
+                   ] + install_i18n("i18n", os.path.join(sys.prefix, 'share', 'locale')),
         )
 
