@@ -1,11 +1,9 @@
 NAME := connector_nagios
-PKGNAME := vigilo-connector-nagios
-#PREFIX = /usr
-SYSCONFDIR := /etc
-LOCALSTATEDIR := /var
-DESTDIR = 
 
 all: build settings.ini
+
+include buildenv/Makefile.common
+PKGNAME := vigilo-connector-nagios
 
 settings.ini: settings.ini.in
 	sed -e 's,@LOCALSTATEDIR@,$(LOCALSTATEDIR),g' $^ > $@
@@ -21,6 +19,5 @@ install: settings.ini
 clean: clean_python
 	rm -f settings.ini
 
-include buildenv/Makefile.common
 lint: lint_pylint
 tests: tests_nose
