@@ -37,8 +37,6 @@ Requires:   python26-babel
 Requires:   python26-zope-interface
 Requires:   python26-distribute
 
-Requires(pre): rpm-helper
-
 Buildarch:  noarch
 
 
