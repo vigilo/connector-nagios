@@ -1,9 +1,8 @@
-NAME := connector_nagios
+NAME := connector-nagios
 
 all: build settings.ini
 
 include buildenv/Makefile.common
-PKGNAME := vigilo-connector-nagios
 
 settings.ini: settings.ini.in
 	sed -e 's,@LOCALSTATEDIR@,$(LOCALSTATEDIR),g' $^ > $@
