@@ -11,8 +11,13 @@ service = pubsub.localhost
 # Nom d'utilisateur à utiliser pour se connecter au bus.
 jid = connector-nagios@localhost
 
-# Mot de passe à utiliser
+# Mot de passe associé au jid donné.
 password = connector-nagios
+
+# Indique si un chiffrement de la connexion est obligatoire (True)
+# ou simplement préféré (False). Dans tous les cas, une connexion
+# TLS sera créée lorsque c'est possible.
+require_tls = False
 
 # Liste des noms des topics à surveiller, séparés par des virgules.
 # Si la liste est vide, mettre uniquement une virgule.
@@ -74,7 +79,7 @@ keys=consoleFormatter,syslogFormatter
 [logger_root]
 level=INFO
 handlers=syslog,console
- 
+
 [logger_twisted]
 level=INFO
 qualname=twisted
