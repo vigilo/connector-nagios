@@ -36,7 +36,7 @@ class XMPPToPipeForwarder(XMPPHandler):
         # add an observer to deal with chat message (oneToOne message)
         self.xmlstream.addObserver("/message[@type='chat']", self.chatReceived)
 
-        
+
         # There's probably a way to configure it (on_sub vs on_sub_and_presence)
         # but the spec defaults to not sending subscriptions without presence.
         self.send(xmppim.AvailablePresence())
@@ -48,10 +48,10 @@ class XMPPToPipeForwarder(XMPPHandler):
         """
         Instancie un connecteur XMPP vers pipe.
 
-        @param pipe_filename: le nom du fichier pipe qui accueillra les 
+        @param pipe_filename: le nom du fichier pipe qui accueillra les
         messages XMPP
         @type pipe_filename: C{str}
-        @param dbfilename: le nom du fichier permettant la sauvegarde des 
+        @param dbfilename: le nom du fichier permettant la sauvegarde des
         messages en cas de problème d'éciture sur le pipe
         @type dbfilename: C{str}
         @param dbtable: Le nom de la table SQL dans ce fichier.
@@ -92,12 +92,10 @@ class XMPPToPipeForwarder(XMPPHandler):
         send any greeting or initial message, do it here.
         """
         self.sendQueuedMessages()
-    
+
     def messageForward(self, cmd_timestamp, cmd_name, cmd_value):
         """
         function to forward the message to the pipe
-        @param msg: message to forward
-        @type msg: C{str}
         """
 
         # TODO: ajouter des tests unitaires
@@ -137,9 +135,9 @@ class XMPPToPipeForwarder(XMPPHandler):
 
 
     def chatReceived(self, msg):
-        """ 
-        function to treat a received chat message 
-        
+        """
+        function to treat a received chat message
+
         @param msg: msg to treat
         @type  msg: Xml object
 
