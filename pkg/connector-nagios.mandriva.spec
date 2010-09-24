@@ -79,7 +79,8 @@ rm -rf $RPM_BUILD_ROOT
 %attr(755,root,root) %{_bindir}/%{name}
 %attr(744,root,root) %{_initrddir}/%{name}
 %dir %{_sysconfdir}/vigilo/
-%config(noreplace) %{_sysconfdir}/vigilo/%{module}
+%dir %{_sysconfdir}/vigilo/%{module}
+%attr(640,root,vigilo-nagios) %config(noreplace) %{_sysconfdir}/vigilo/%{module}/settings.ini
 %config(noreplace) %{_sysconfdir}/sysconfig/*
 %{python_sitelib}/*
 %dir %{_localstatedir}/lib/vigilo
