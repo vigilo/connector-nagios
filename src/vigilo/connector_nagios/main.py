@@ -27,11 +27,6 @@ class ConnectorServiceMaker(object):
         from vigilo.common.logging import get_logger
         LOGGER = get_logger(__name__)
 
-        # On envoie les logs de Twisted vers Python
-        from twisted.python.log import PythonLoggingObserver
-        log = PythonLoggingObserver()
-        log.start()
-
         from vigilo.connector_nagios.xmpptopipefw import XMPPToPipeForwarder
         from vigilo.connector.sockettonodefw import SocketToNodeForwarder
         from vigilo.pubsub.checknode import VerificationNode
