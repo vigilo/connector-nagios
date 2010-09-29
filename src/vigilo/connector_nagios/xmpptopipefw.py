@@ -118,7 +118,10 @@ class XMPPToPipeForwarder(XMPPHandler):
 #  * anything else (eg. pscwatch) which writes to the file will be writing into
 #  * the middle of our commands.
 #  */
-            LOGGER.debug(_("Writing to %s: %s") % (self.pipe_filename, msg))
+            LOGGER.debug(_("Writing to %(pipe)s: %(msg)s") % {
+                'pipe': self.pipe_filename,
+                'msg': msg,
+            })
             # cannot open in append mode, since that causes a seek
             pipe = os.open(self.pipe_filename, os.O_WRONLY)
             fcntl.flock(pipe, fcntl.LOCK_EX)
@@ -178,4 +181,3 @@ class XMPPToPipeForwarder(XMPPHandler):
                                     cmd_value,
                                 ))
                 self.messageForward(cmd_timestamp, cmd_name, cmd_value)
-
