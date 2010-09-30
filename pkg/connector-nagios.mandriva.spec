@@ -16,6 +16,7 @@ License:    GPLv2
 BuildRequires:   python-setuptools
 BuildRequires:   python-babel
 
+Requires:   socat
 Requires:   python >= 2.5
 Requires:   python-setuptools
 Requires:   vigilo-common vigilo-connector

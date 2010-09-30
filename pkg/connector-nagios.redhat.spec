@@ -22,6 +22,7 @@ License:    GPLv2
 BuildRequires:   python26-distribute
 BuildRequires:   python26-babel
 
+Requires:   socat
 Requires:   python26-distribute
 Requires:   vigilo-common vigilo-connector
 Requires:   nagios
