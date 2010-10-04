@@ -3,7 +3,8 @@
 # vigilo-connector-nagios       Init script for the Vigilo-Nagios connector
 #
 #
-
+# chkconfig: 345 95 05
+# description: Starts and stops the Vigilo-Nagios connector
 ### BEGIN INIT INFO
 # Provides: vigilo-connector-nagios
 # Required-Start: $network $syslog
