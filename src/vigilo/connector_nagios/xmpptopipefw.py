@@ -5,44 +5,28 @@ Extends pubsub clients to compute Node message.
 """
 from __future__ import absolute_import
 
-
-from vigilo.common.logging import get_logger
-from vigilo.connector.store import DbRetry
 import os
 import stat
 import fcntl
-from wokkel.subprotocols import XMPPHandler
+from wokkel.pubsub import PubSubClient
 from wokkel import xmppim
+from vigilo.pubsub import xml
 
+from vigilo.common.conf import settings
+settings.load_module(__name__)
+
+from vigilo.common.logging import get_logger
+from vigilo.connector.store import DbRetry
 LOGGER = get_logger(__name__)
 
 from vigilo.common.gettext import translate
 _ = translate(__name__)
 
-class XMPPToPipeForwarder(XMPPHandler):
+class XMPPToPipeForwarder(PubSubClient):
     """
     Receives messages from xmpp, and passes them to the pipe.
     Forward XMPP to pipe.
     """
-    def connectionInitialized(self):
-        """
-        redefinition in order to add :
-            - new observer for message type=chat;
-            - sending presence.
-
-        """
-        # Called when we are connected and authenticated
-        XMPPHandler.connectionInitialized(self)
-        # add an observer to deal with chat message (oneToOne message)
-        self.xmlstream.addObserver("/message[@type='chat']", self.chatReceived)
-
-
-        # There's probably a way to configure it (on_sub vs on_sub_and_presence)
-        # but the spec defaults to not sending subscriptions without presence.
-        self.send(xmppim.AvailablePresence())
-        LOGGER.debug(_('Connection initialized'))
-
-
 
     def __init__(self, pipe_filename, dbfilename, dbtable):
         """
@@ -57,10 +41,28 @@ class XMPPToPipeForwarder(XMPPHandler):
         @param dbtable: Le nom de la table SQL dans ce fichier.
         @type dbtable: C{str}
         """
-        XMPPHandler.__init__(self)
+        super(XMPPToPipeForwarder, self).__init__()
         self.retry = DbRetry(dbfilename, dbtable)
         self.__backuptoempty = os.path.exists(dbfilename)
         self.pipe_filename = pipe_filename
+
+    def connectionInitialized(self):
+        """
+        redefinition in order to add :
+            - new observer for message type=chat;
+            - sending presence.
+
+        """
+        # Called when we are connected and authenticated
+        super(XMPPToPipeForwarder, self).connectionInitialized()
+        # add an observer to deal with chat message (oneToOne message)
+        self.xmlstream.addObserver("/message[@type='chat']", self.chatReceived)
+
+
+        # There's probably a way to configure it (on_sub vs on_sub_and_presence)
+        # but the spec defaults to not sending subscriptions without presence.
+        self.send(xmppim.AvailablePresence())
+        LOGGER.debug(_('Connection initialized'))
 
     def sendQueuedMessages(self):
         """
@@ -97,6 +99,12 @@ class XMPPToPipeForwarder(XMPPHandler):
         """
         function to forward the message to the pipe
         """
+        LOGGER.debug(_('Command message to forward: '
+                        'ts=%s name=%s val=%s') % (
+                            cmd_timestamp,
+                            cmd_name,
+                            cmd_value,
+                        ))
 
         # TODO: ajouter des tests unitaires
         msg = "[%s] %s;%s" % (cmd_timestamp, cmd_name, cmd_value)
@@ -136,7 +144,6 @@ class XMPPToPipeForwarder(XMPPHandler):
             self.retry.store(msg)
             self.__backuptoempty = True
 
-
     def chatReceived(self, msg):
         """
         function to treat a received chat message
@@ -149,14 +156,12 @@ class XMPPToPipeForwarder(XMPPHandler):
         from vigilo.common.conf import settings
         settings.load_module(__name__)
 
-        # It should only be one body
         # Il ne devrait y avoir qu'un seul corps de message (body)
         bodys = [element for element in msg.elements()
                          if element.name in ('body',)]
 
         for b in bodys:
             for data in b.elements():
-                # the data we need is just underneath
                 # les données dont on a besoin sont juste en dessous
                 if data.name != 'command':
                     LOGGER.error(_("Unrecognized message type: '%s'")
@@ -174,10 +179,50 @@ class XMPPToPipeForwarder(XMPPHandler):
                                                         ['accepted_commands'],
                                  })
                     continue
-                LOGGER.debug(_('Command message to forward: '
-                                'ts=%s name=%s val=%s') % (
-                                    cmd_timestamp,
-                                    cmd_name,
-                                    cmd_value,
-                                ))
+                self.messageForward(cmd_timestamp, cmd_name, cmd_value)
+
+    def itemsReceived(self, event):
+        """
+        Méthode de traitement des messages arrivant
+        sur un nœud de publication auquel le connecteur
+        Nagios est abonné.
+        """
+        for item in event.items:
+            # Item is a domish.IElement and a domish.Element
+            # Serialize as XML before queueing,
+            # or we get harmless stderr pollution  × 5 lines:
+            # Exception RuntimeError: 'maximum recursion depth exceeded in
+            # __subclasscheck__' in <type 'exceptions.AttributeError'> ignored
+            #
+            # stderr pollution caused by http://bugs.python.org/issue5508
+            # and some touchiness on domish attribute access.
+            xmlstr = item.toXml()
+            LOGGER.debug(_(u'Got item: %s'), xmlstr)
+
+            # @FIXME: il faudrait faire un refactoring du code
+            # pour évite la duplication de code entre cette méthode
+            # et la méthode chatReceived.
+            if item.name != 'item':
+                # The alternative is 'retract', which we silently ignore
+                # We receive retractations in FIFO order,
+                # ejabberd keeps 10 items before retracting old items.
+                LOGGER.debug(_(u'Skipping unrecognized item (%s)'), item.name)
+                continue
+
+            data = item.firstChildElement()
+            qualified_name = xml.namespaced_tag(data.uri, data.name)
+
+            if qualified_name == xml.namespaced_tag(xml.NS_NAGIOS, 'command'):
+                cmd_timestamp = int(str(data.timestamp))
+                cmd_name = str(data.cmdname)
+                cmd_value = str(data.value)
+                if cmd_name not in \
+                    settings['connector-nagios']['accepted_commands']:
+                    LOGGER.error(_("Command '%(received)s' disallowed by "
+                                "policy, accepted commands: %(accepted)r") % {
+                                    'received': data.cmdname,
+                                    'accepted': settings['connector-nagios']
+                                                        ['accepted_commands'],
+                                 })
+                    continue
                 self.messageForward(cmd_timestamp, cmd_name, cmd_value)
