@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version:  vigilo.connector-nagios\n"
 "Report-Msgid-Bugs-To: contact@projet-vigilo.org\n"
 "POT-Creation-Date: 2010-02-19 11:00+0100\n"
-"PO-Revision-Date: 2010-10-04 16:55+0200\n"
+"PO-Revision-Date: 2010-10-29 20:39+0200\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
 "Plural-Forms: nplurals=2; plural=(n > 1)\n"
@@ -39,11 +39,16 @@ msgstr "Impossible d'écrire la commande sur le pipe de Nagios : '%s'"
 msgid "Can't traverse directory: '%(dir)s'"
 msgstr "Impossible de traverser le dossier : '%(dir)s'"
 
-#: src/vigilo/connector_nagios/xmpptopipefw.py:43
+#: src/vigilo/connector_nagios/xmpptopipefw.py:65
 msgid "Connection initialized"
 msgstr "Connexion initialisée"
 
-#: src/vigilo/connector_nagios/xmpptopipefw.py:108
+#: src/vigilo/connector_nagios/xmpptopipefw.py:102
+#, python-format
+msgid "Command message to forward: ts=%s name=%s val=%s"
+msgstr "Message de commande à transférer : ts=%s name=%s val=%s"
+
+#: src/vigilo/connector_nagios/xmpptopipefw.py:116
 msgid ""
 "The configured nagios command pipe is not a FIFO. Storing message for "
 "later."
@@ -51,12 +56,12 @@ msgstr ""
 "Le pipe de commande de Nagios n'est pas du type FIFO. Le message a été "
 "stocké pour une retransmission ultérieure."
 
-#: src/vigilo/connector_nagios/xmpptopipefw.py:121
+#: src/vigilo/connector_nagios/xmpptopipefw.py:129
 #, python-format
 msgid "Writing to %(pipe)s: %(msg)s"
 msgstr "Écriture dans %(pipe)s : %(msg)s"
 
-#: src/vigilo/connector_nagios/xmpptopipefw.py:133
+#: src/vigilo/connector_nagios/xmpptopipefw.py:141
 #, python-format
 msgid ""
 "Unable to forward message %(error_message)s, this message is stored for "
@@ -65,12 +70,13 @@ msgstr ""
 "Impossible de transférer le message %(error_message)s, ce message est "
 "conservé en vue d'une future réémission."
 
-#: src/vigilo/connector_nagios/xmpptopipefw.py:162
+#: src/vigilo/connector_nagios/xmpptopipefw.py:167
 #, python-format
 msgid "Unrecognized message type: '%s'"
 msgstr "Type de message non reconnu : '%s'"
 
-#: src/vigilo/connector_nagios/xmpptopipefw.py:170
+#: src/vigilo/connector_nagios/xmpptopipefw.py:175
+#: src/vigilo/connector_nagios/xmpptopipefw.py:221
 #, python-format
 msgid ""
 "Command '%(received)s' disallowed by policy, accepted commands: "
@@ -79,8 +85,12 @@ msgstr ""
 "Commande '%(received)s' bloquée par la politique de sécurité. Commandes "
 "acceptées : %(accepted)r"
 
-#: src/vigilo/connector_nagios/xmpptopipefw.py:177
+#: src/vigilo/connector_nagios/xmpptopipefw.py:200
 #, python-format
-msgid "Command message to forward: ts=%s name=%s val=%s"
-msgstr "Message de commande à transférer : ts=%s name=%s val=%s"
+msgid "Got item: %s"
+msgstr "Élément reçu : %s"
 
+#: src/vigilo/connector_nagios/xmpptopipefw.py:209
+#, python-format
+msgid "Skipping unrecognized item (%s)"
+msgstr "Élément inconnu ignoré (%s)"
