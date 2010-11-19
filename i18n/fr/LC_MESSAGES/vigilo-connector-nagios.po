@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version:  vigilo.connector-nagios\n"
 "Report-Msgid-Bugs-To: contact@projet-vigilo.org\n"
 "POT-Creation-Date: 2010-02-19 11:00+0100\n"
-"PO-Revision-Date: 2010-10-29 20:39+0200\n"
+"PO-Revision-Date: 2010-11-19 12:10+0100\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
 "Plural-Forms: nplurals=2; plural=(n > 1)\n"
@@ -94,3 +94,4 @@ msgstr "Élément reçu : %s"
 #, python-format
 msgid "Skipping unrecognized item (%s)"
 msgstr "Élément inconnu ignoré (%s)"
+

@@ -1,4 +1,4 @@
-# English translations for vigilo-connector-nagios.
+# German translations for vigilo-connector-nagios.
 # Copyright (C) 2010 ORGANIZATION
 # This file is distributed under the same license as the
 # vigilo-connector-nagios
@@ -8,11 +8,11 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: vigilo-connector-nagios 2.0.0\n"
-"Report-Msgid-Bugs-To: contact@projet-vigilo.org\n"
+"Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
 "POT-Creation-Date: 2010-11-19 12:10+0100\n"
 "PO-Revision-Date: 2010-11-19 12:10+0100\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
-"Language-Team: en <LL@li.org>\n"
+"Language-Team: de <LL@li.org>\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
@@ -23,45 +23,45 @@ msgstr ""
 #: src/vigilo/connector_nagios/main.py:86
 #, python-format
 msgid "Directory not found: '%(dir)s'"
-msgstr "Directory not found: '%(dir)s'"
+msgstr "Verzeichnis: '%(dir)s' nicht gefunden"
 
 #: src/vigilo/connector_nagios/main.py:79
 #: src/vigilo/connector_nagios/main.py:91
 #, python-format
 msgid "Wrong permissions on directory: '%(dir)s'"
-msgstr "Wrong permissions on directory: '%(dir)s'"
+msgstr "Falsche Berechtigungen für Verzeichnis: '%(dir)s'"
 
 #: src/vigilo/connector_nagios/main.py:98
 #, python-format
 msgid "Can't write to the Nagios command pipe: '%s'"
-msgstr "Can't write to the Nagios command pipe: '%s'"
+msgstr "Kann nicht an Nagios Befehl-Pipe: '%s' schreiben"
 
 #: src/vigilo/connector_nagios/main.py:102
 #, python-format
 msgid "Can't traverse directory: '%(dir)s'"
-msgstr "Can't traverse directory: '%(dir)s'"
+msgstr "Verzeichnis: '%(dir)s' kann nicht durchsucht werden"
 
 #: src/vigilo/connector_nagios/xmpptopipefw.py:65
 msgid "Connection initialized"
-msgstr "Connection initialized"
+msgstr "Verbindung initialisiert"
 
 #: src/vigilo/connector_nagios/xmpptopipefw.py:102
 #, python-format
 msgid "Command message to forward: ts=%s name=%s val=%s"
-msgstr "Command message to forward: ts=%s name=%s val=%s"
+msgstr "Befehl zur Weiterleitung von: ts=%s name=%s val=%s"
 
 #: src/vigilo/connector_nagios/xmpptopipefw.py:116
 msgid ""
 "The configured nagios command pipe is not a FIFO. Storing message for "
 "later."
 msgstr ""
-"The configured nagios command pipe is not a FIFO. Storing message for "
-"later."
+"Die konfigurierte Nagios Befehl-Pipe ist kein FIFO. Nachricht wird für "
+"später gespeichert."
 
 #: src/vigilo/connector_nagios/xmpptopipefw.py:129
 #, python-format
 msgid "Writing to %(pipe)s: %(msg)s"
-msgstr "Writing to %(pipe)s: %(msg)s"
+msgstr "Es wird an %(pipe)s: %(msg)s geschrieben"
 
 #: src/vigilo/connector_nagios/xmpptopipefw.py:141
 #, python-format
@@ -69,13 +69,13 @@ msgid ""
 "Unable to forward message %(error_message)s, this message is stored for "
 "later reemission."
 msgstr ""
-"Unable to forward message %(error_message)s, this message is stored for "
-"later reemission."
+"Nachricht %(error_message)s kann nicht weitergeleitet werden. Sie wird "
+"gespeichert und später erneut gesendet."
 
 #: src/vigilo/connector_nagios/xmpptopipefw.py:167
 #, python-format
 msgid "Unrecognized message type: '%s'"
-msgstr "Unrecognized message type: '%s'"
+msgstr "Nachrichtentyp: '%s' unbekannt"
 
 #: src/vigilo/connector_nagios/xmpptopipefw.py:175
 #: src/vigilo/connector_nagios/xmpptopipefw.py:221
@@ -84,16 +84,16 @@ msgid ""
 "Command '%(received)s' disallowed by policy, accepted commands: "
 "%(accepted)r"
 msgstr ""
-"Command '%(received)s' disallowed by policy, accepted commands: "
-"%(accepted)r"
+"Befehl '%(received)s' nach Richtlinien nicht zulässig, akzeptierte "
+"Befehle: %(accepted)r"
 
 #: src/vigilo/connector_nagios/xmpptopipefw.py:200
 #, python-format
 msgid "Got item: %s"
-msgstr "Got item: %s"
+msgstr ""
 
 #: src/vigilo/connector_nagios/xmpptopipefw.py:209
 #, python-format
 msgid "Skipping unrecognized item (%s)"
-msgstr "Skipping unrecognized item (%s)"
+msgstr ""
 
