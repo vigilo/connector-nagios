@@ -63,7 +63,7 @@ listen_unix = @LOCALSTATEDIR@/lib/vigilo/connector-nagios/send.sock
 
 # Emplacement du pipe utilisé pour envoyer des commandes à Nagios.
 # Si absent, il ne sera pas possible d'envoyer des commandes à Nagios.
-nagios_pipe = /var/spool/nagios/nagios.cmd
+nagios_pipe = @NAGIOSCMDPIPE@
 
 
 
