@@ -41,7 +41,6 @@ backup_table_to_bus = tobus
 backup_table_from_bus = frombus
 
 
-
 [publications]
 # Noms des messages XML traités avec pour chaque type de message
 # le nom du nœud XMPP sur lesquel les messages de ce type sont envoyés.
@@ -50,12 +49,11 @@ state = /home/localhost/connector-nagios/state
 event = /home/localhost/connector-nagios/event
 
 
-
 [connector-nagios]
 # Liste des types de messages XML <command> que le connecteur-nagios
 # acceptera de transmettre à Nagios, séparés par des virgules.
 # Si la liste est vide, mettre uniquement une virgule.
-accepted_commands = PROCESS_SERVICE_CHECK_RESULT, PROCESS_HOST_CHECK_RESULT, SCHEDULE_HOST_DOWNTIME, SCHEDULE_SVC_DOWNTIME, SCHEDULE_SVC_CHECK, SCHEDULE_HOST_CHECK, SCHEDULE_HOST_SVC_CHECKS
+accepted_commands = PROCESS_SERVICE_CHECK_RESULT, PROCESS_HOST_CHECK_RESULT, SCHEDULE_HOST_DOWNTIME, SCHEDULE_SVC_DOWNTIME, SCHEDULE_SVC_CHECK, SCHEDULE_HOST_CHECK, SCHEDULE_HOST_SVC_CHECKS, CHANGE_NORMAL_HOST_CHECK_INTERVAL, CHANGE_NORMAL_SVC_CHECK_INTERVAL
 
 # Emplacement du socket utilisé pour recevoir des messages de Nagios.
 # Si absent, il ne sera pas possible de recevoir les notifications de Nagios.
