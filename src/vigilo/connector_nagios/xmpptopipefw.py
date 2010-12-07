@@ -8,6 +8,7 @@ from __future__ import absolute_import
 import os
 import stat
 import fcntl
+from twisted.internet import defer, threads
 from wokkel.pubsub import PubSubClient
 from wokkel import xmppim
 from vigilo.pubsub import xml
@@ -43,7 +44,7 @@ class XMPPToPipeForwarder(PubSubClient):
         """
         super(XMPPToPipeForwarder, self).__init__()
         self.retry = DbRetry(dbfilename, dbtable)
-        self.__backuptoempty = os.path.exists(dbfilename)
+        self._backuptoempty = os.path.exists(dbfilename)
         self.pipe_filename = pipe_filename
 
     def connectionInitialized(self):
@@ -66,40 +67,60 @@ class XMPPToPipeForwarder(PubSubClient):
         # Envoi des anciens messages
         self.sendQueuedMessages()
 
+    @defer.inlineCallbacks
     def sendQueuedMessages(self):
         """
         Called to send Message previously stored
         """
-        if not self.__backuptoempty:
+        if not self._backuptoempty:
             return
-        self.__backuptoempty = False
+        self._backuptoempty = False
         # XXX Ce code peut potentiellement boucler indéfiniment...
         while True:
             msg = self.retry.unstore()
             if msg is None:
                 break
-            self.messageForward(msg)
+            yield threads.deferToThread(self.write_to_nagios, msg)
         self.retry.vacuum()
 
     def formatMessage(self, cmd_timestamp, cmd_name, cmd_value):
-        # TODO: ajouter des tests unitaires
         return "[%s] %s;%s" % (cmd_timestamp, cmd_name, cmd_value)
 
-    def messageForward(self, msg):
+    @defer.inlineCallbacks
+    def messageForward(self, data):
         """
         function to forward the message to the pipe
         """
-        LOGGER.debug(_('Command message to forward: %s') % msg)
-
-        if self.__backuptoempty:
+        LOGGER.debug(_('Command message to forward: %s') % data.toXml())
+        if self._backuptoempty:
             self.sendQueuedMessages()
+        qualified_name = xml.namespaced_tag(data.uri, data.name)
+        if qualified_name not in [xml.namespaced_tag(xml.NS_NAGIOS, 'command'),
+                                  xml.namespaced_tag(xml.NS_COMMAND, 'command')]:
+            return
+        cmd_timestamp = int(str(data.timestamp))
+        cmd_name = str(data.cmdname)
+        cmd_value = str(data.value)
+        if cmd_name not in \
+            settings['connector-nagios']['accepted_commands']:
+            LOGGER.error(_("Command '%(received)s' disallowed by "
+                        "policy, accepted commands: %(accepted)r") % {
+                            'received': data.cmdname,
+                            'accepted': settings['connector-nagios']
+                                                ['accepted_commands'],
+                         })
+            return
+        msg = self.formatMessage(cmd_timestamp, cmd_name, cmd_value)
+        yield threads.deferToThread(self.write_to_nagios, msg)
+
+    def write_to_nagios(self, msg):
         try:
             # testing there is a pipe (FIFO) which exist.
             if not stat.S_ISFIFO(os.stat(self.pipe_filename).st_mode):
                 LOGGER.error(_('The configured nagios command pipe is not '
                         'a FIFO. Storing message for later.'))
                 self.retry.store(msg)
-                self.__backuptoempty = True
+                self._backuptoempty = True
                 return
             # XXX il serait possible d'aggréger les écritures si on flush
             #  après chaque écriture (pour ne pas ouvrir/fermer le pipe à
@@ -125,7 +146,7 @@ class XMPPToPipeForwarder(PubSubClient):
                            'this message is stored for later reemission.') % \
                             {'error_message': str(e)})
             self.retry.store(msg)
-            self.__backuptoempty = True
+            self._backuptoempty = True
 
     def chatReceived(self, msg):
         """
@@ -146,23 +167,7 @@ class XMPPToPipeForwarder(PubSubClient):
         for b in bodys:
             for data in b.elements():
                 # les données dont on a besoin sont juste en dessous
-                if data.name != 'command':
-                    LOGGER.error(_("Unrecognized message type: '%s'")
-                                    % data.cmdname)
-                    continue
-                cmd_timestamp = int(str(data.timestamp))
-                cmd_name = str(data.cmdname)
-                cmd_value = str(data.value)
-                if cmd_name not in \
-                    settings['connector-nagios']['accepted_commands']:
-                    LOGGER.error(_("Command '%(received)s' disallowed by "
-                                "policy, accepted commands: %(accepted)r") % {
-                                    'received': data.cmdname,
-                                    'accepted': settings['connector-nagios']
-                                                        ['accepted_commands'],
-                                 })
-                    continue
-                self.messageForward(self.formatMessage(cmd_timestamp, cmd_name, cmd_value))
+                self.messageForward(data)
 
     def itemsReceived(self, event):
         """
@@ -193,19 +198,4 @@ class XMPPToPipeForwarder(PubSubClient):
                 continue
 
             data = item.firstChildElement()
-            qualified_name = xml.namespaced_tag(data.uri, data.name)
-
-            if qualified_name == xml.namespaced_tag(xml.NS_NAGIOS, 'command'):
-                cmd_timestamp = int(str(data.timestamp))
-                cmd_name = str(data.cmdname)
-                cmd_value = str(data.value)
-                if cmd_name not in \
-                    settings['connector-nagios']['accepted_commands']:
-                    LOGGER.error(_("Command '%(received)s' disallowed by "
-                                "policy, accepted commands: %(accepted)r") % {
-                                    'received': data.cmdname,
-                                    'accepted': settings['connector-nagios']
-                                                        ['accepted_commands'],
-                                 })
-                    continue
-                self.messageForward(self.formatMessage(cmd_timestamp, cmd_name, cmd_value))
+            self.messageForward(data)
