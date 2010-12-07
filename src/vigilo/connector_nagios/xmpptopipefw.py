@@ -63,6 +63,8 @@ class XMPPToPipeForwarder(PubSubClient):
         # but the spec defaults to not sending subscriptions without presence.
         self.send(xmppim.AvailablePresence())
         LOGGER.debug(_('Connection initialized'))
+        # Envoi des anciens messages
+        self.sendQueuedMessages()
 
     def sendQueuedMessages(self):
         """
@@ -78,19 +80,6 @@ class XMPPToPipeForwarder(PubSubClient):
                 break
             self.messageForward(msg)
         self.retry.vacuum()
-
-
-    def connectionInitialized(self):
-        """Called when a connection is made.
-
-        This may be considered the initializer of the protocol, because
-        it is called when the connection is completed.  For clients,
-        this is called once the connection to the server has been
-        established; for servers, this is called after an accept() call
-        stops blocking and a socket has been received.  If you need to
-        send any greeting or initial message, do it here.
-        """
-        self.sendQueuedMessages()
 
     def formatMessage(self, cmd_timestamp, cmd_name, cmd_value):
         # TODO: ajouter des tests unitaires
