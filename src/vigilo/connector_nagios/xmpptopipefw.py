@@ -83,9 +83,6 @@ class XMPPToPipeForwarder(PubSubClient):
             yield threads.deferToThread(self.write_to_nagios, msg)
         self.retry.vacuum()
 
-    def formatMessage(self, cmd_timestamp, cmd_name, cmd_value):
-        return "[%s] %s;%s" % (cmd_timestamp, cmd_name, cmd_value)
-
     @defer.inlineCallbacks
     def messageForward(self, data):
         """
@@ -110,7 +107,7 @@ class XMPPToPipeForwarder(PubSubClient):
                                                 ['accepted_commands'],
                          })
             return
-        msg = self.formatMessage(cmd_timestamp, cmd_name, cmd_value)
+        msg = "[%s] %s;%s" % (cmd_timestamp, cmd_name, cmd_value)
         yield threads.deferToThread(self.write_to_nagios, msg)
 
     def write_to_nagios(self, msg):
