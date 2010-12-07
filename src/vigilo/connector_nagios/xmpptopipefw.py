@@ -91,7 +91,7 @@ class XMPPToPipeForwarder(PubSubClient):
         """
         LOGGER.debug(_('Command message to forward: %s') % msg)
 
-        if self.__backuptoempty and not self.__emptyingbackup:
+        if self.__backuptoempty:
             self.sendQueuedMessages()
         try:
             # testing there is a pipe (FIFO) which exist.
