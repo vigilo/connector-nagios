@@ -68,22 +68,19 @@ class XMPPToPipeForwarder(PubSubClient):
         """
         Called to send Message previously stored
         """
-        if self.__backuptoempty:
-            self.__backuptoempty = False
-            # XXX Ce code peut potentiellement boucler indéfiniment...
-            while True:
-                msg = self.retry.unstore()
-                if msg is None:
-                    break
-                else:
-                    if self.messageForward(msg) is not True:
-                        # we loose the ability to send message again
-                        self.__backuptoempty = True
-                        break
-            self.retry.vacuum()
+        if not self.__backuptoempty:
+            return
+        self.__backuptoempty = False
+        # XXX Ce code peut potentiellement boucler indéfiniment...
+        while True:
+            msg = self.retry.unstore()
+            if msg is None:
+                break
+            self.messageForward(msg)
+        self.retry.vacuum()
 
 
-    def connectionMade(self):
+    def connectionInitialized(self):
         """Called when a connection is made.
 
         This may be considered the initializer of the protocol, because
@@ -95,19 +92,16 @@ class XMPPToPipeForwarder(PubSubClient):
         """
         self.sendQueuedMessages()
 
-    def messageForward(self, cmd_timestamp, cmd_name, cmd_value):
+    def formatMessage(self, cmd_timestamp, cmd_name, cmd_value):
+        # TODO: ajouter des tests unitaires
+        return "[%s] %s;%s" % (cmd_timestamp, cmd_name, cmd_value)
+
+    def messageForward(self, msg):
         """
         function to forward the message to the pipe
         """
-        LOGGER.debug(_('Command message to forward: '
-                        'ts=%s name=%s val=%s') % (
-                            cmd_timestamp,
-                            cmd_name,
-                            cmd_value,
-                        ))
+        LOGGER.debug(_('Command message to forward: %s') % msg)
 
-        # TODO: ajouter des tests unitaires
-        msg = "[%s] %s;%s" % (cmd_timestamp, cmd_name, cmd_value)
         if self.__backuptoempty and not self.__emptyingbackup:
             self.sendQueuedMessages()
         try:
@@ -179,7 +173,7 @@ class XMPPToPipeForwarder(PubSubClient):
                                                         ['accepted_commands'],
                                  })
                     continue
-                self.messageForward(cmd_timestamp, cmd_name, cmd_value)
+                self.messageForward(self.formatMessage(cmd_timestamp, cmd_name, cmd_value))
 
     def itemsReceived(self, event):
         """
@@ -225,4 +219,4 @@ class XMPPToPipeForwarder(PubSubClient):
                                                         ['accepted_commands'],
                                  })
                     continue
-                self.messageForward(cmd_timestamp, cmd_name, cmd_value)
+                self.messageForward(self.formatMessage(cmd_timestamp, cmd_name, cmd_value))
