@@ -29,39 +29,9 @@ class ConnectorServiceMaker(object):
 
         from vigilo.connector_nagios.xmpptopipefw import XMPPToPipeForwarder
         from vigilo.connector.sockettonodefw import SocketToNodeForwarder
-        from vigilo.pubsub.checknode import VerificationNode
 
-        try:
-            require_tls = settings['bus'].as_bool('require_tls')
-        except KeyError:
-            require_tls = False
+        xmpp_client = client.client_factory(settings)
 
-        xmpp_client = client.XMPPClient(
-                JID(settings['bus']['jid']),
-                settings['bus']['password'],
-                settings['bus']['host'],
-                require_tls=require_tls)
-        xmpp_client.setName('xmpp_client')
-
-        try:
-            xmpp_client.logTraffic = settings['bus'].as_bool('log_traffic')
-        except KeyError:
-            xmpp_client.logTraffic = False
-
-
-        try:
-            list_nodeOwner = settings['bus'].as_list('owned_topics')
-        except KeyError:
-            list_nodeOwner = []
-
-        try:
-            list_nodeSubscriber = settings['bus'].as_list('watched_topics')
-        except KeyError:
-            list_nodeSubscriber = []
-
-        verifyNode = VerificationNode(list_nodeOwner, list_nodeSubscriber,
-                                      doThings=True)
-        verifyNode.setHandlerParent(xmpp_client)
         nodetopublish = settings.get('publications', {})
         _service = JID(settings['bus'].get('service', None))
 
@@ -142,4 +112,3 @@ def main(*args):
 
 if __name__ == '__main__':
     main()
-

@@ -19,15 +19,10 @@ password = connector-nagios
 # TLS sera créée lorsque c'est possible.
 require_tls = False
 
-# Liste des noms des topics à surveiller, séparés par des virgules.
+# Liste des noms des topics auxquels le connecteur est abonné,
+# séparés par des virgules.
 # Si la liste est vide, mettre uniquement une virgule.
-# Pas utilisé par le connecteur-nagios.
-watched_topics = ,
-
-# Liste des noms des topics à créer, séparés par des virgules.
-# Si la liste est vide, mettre uniquement une virgule.
-owned_topics = /home/localhost/connector-nagios/event, /home/localhost/connector-nagios/perf, /home/localhost/connector-nagios/state, /home/localhost/connector-nagios/downtime
-
+subscriptions = ,
 
 
 [connector]
@@ -44,9 +39,9 @@ backup_table_from_bus = frombus
 [publications]
 # Noms des messages XML traités avec pour chaque type de message
 # le nom du nœud XMPP sur lesquel les messages de ce type sont envoyés.
-perf = /home/localhost/connector-nagios/perf
-state = /home/localhost/connector-nagios/state
-event = /home/localhost/connector-nagios/event
+perf = /vigilo/perf
+state = /vigilo/state
+event = /vigilo/event
 
 
 [connector-nagios]
