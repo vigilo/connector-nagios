@@ -1,7 +1,4 @@
 [bus]
-# Le trafic lié au bus XMPP doit-il être enregistré dans les logs ?
-log_traffic = False
-
 # Nom ou adresse IP du serveur XMPP à utiliser.
 host = localhost
 
@@ -22,7 +19,14 @@ require_tls = False
 # Liste des noms des topics auxquels le connecteur est abonné,
 # séparés par des virgules.
 # Si la liste est vide, mettre uniquement une virgule.
-subscriptions = ,
+subscriptions = /vigilo/command
+
+# Le trafic lié au bus XMPP doit-il être enregistré dans les logs ?
+log_traffic = False
+
+# Nombre maximal de message simultanés. Dans eJabberd, cela doit correspondre
+# au paramètre max_fsm_queue du fichier ejabberd.cfg
+max_send_simult = 1000
 
 
 [connector]
@@ -42,6 +46,7 @@ backup_table_from_bus = frombus
 perf = /vigilo/perf
 state = /vigilo/state
 event = /vigilo/event
+command = /vigilo/command
 
 
 [connector-nagios]
