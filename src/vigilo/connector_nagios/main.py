@@ -83,11 +83,8 @@ class ConnectorServiceMaker(object):
 
         if sr is not None:
             message_publisher = SocketToNodeForwarder(
-                    sr,
-                    bkpfile,
-                    settings['connector']['backup_table_to_bus'],
-                    nodetopublish,
-                    _service)
+                    sr, bkpfile,
+                    settings['connector']['backup_table_to_bus'])
             message_publisher.setHandlerParent(xmpp_client)
 
         root_service = service.MultiService()

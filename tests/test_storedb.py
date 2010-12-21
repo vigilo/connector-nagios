@@ -41,10 +41,7 @@ class TestDBRetry(unittest.TestCase):
         tobus_table = "tobus"
         publisher = SocketToNodeForwarder(
                 os.path.join(self.tmpdir, "read.sock"),
-                base, tobus_table,
-                settings.get('publications', {}),
-                "pubsub.example.com",
-        )
+                base, tobus_table)
 
         # récupération du nombre de messages dans la table avant envoi
         conn = sqlite3.connect(base)

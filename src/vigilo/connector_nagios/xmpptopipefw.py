@@ -9,6 +9,7 @@ import os
 import stat
 import fcntl
 from twisted.internet import defer, threads
+from twisted.words.xish import domish
 from wokkel.pubsub import PubSubClient
 from wokkel import xmppim
 from vigilo.pubsub import xml
@@ -17,13 +18,19 @@ from vigilo.common.conf import settings
 settings.load_module(__name__)
 
 from vigilo.common.logging import get_logger
+from vigilo.connector.forwarder import PubSubForwarder, NotConnectedError
 from vigilo.connector.store import DbRetry
 LOGGER = get_logger(__name__)
 
 from vigilo.common.gettext import translate
 _ = translate(__name__)
 
-class XMPPToPipeForwarder(PubSubClient):
+
+class WrongNagiosPipe(NotConnectedError):
+    def __str__(self):
+        return _('the configured nagios command pipe is not a FIFO')
+
+class XMPPToPipeForwarder(PubSubForwarder):
     """
     Receives messages from xmpp, and passes them to the pipe.
     Forward XMPP to pipe.
@@ -42,58 +49,40 @@ class XMPPToPipeForwarder(PubSubClient):
         @param dbtable: Le nom de la table SQL dans ce fichier.
         @type dbtable: C{str}
         """
-        super(XMPPToPipeForwarder, self).__init__()
-        self.retry = DbRetry(dbfilename, dbtable)
-        self._backuptoempty = os.path.exists(dbfilename)
+        super(XMPPToPipeForwarder, self).__init__(dbfilename, dbtable)
         self.pipe_filename = pipe_filename
 
     def connectionInitialized(self):
         """
-        redefinition in order to add :
-            - new observer for message type=chat;
-            - sending presence.
-
+        Redefinition in order to add a new observer for message type=chat
         """
         # Called when we are connected and authenticated
         super(XMPPToPipeForwarder, self).connectionInitialized()
         # add an observer to deal with chat message (oneToOne message)
         self.xmlstream.addObserver("/message[@type='chat']", self.chatReceived)
 
-
-        # There's probably a way to configure it (on_sub vs on_sub_and_presence)
-        # but the spec defaults to not sending subscriptions without presence.
-        self.send(xmppim.AvailablePresence())
-        LOGGER.debug(_('Connection initialized'))
-        # Envoi des anciens messages
-        self.sendQueuedMessages()
-
-    @defer.inlineCallbacks
-    def sendQueuedMessages(self):
-        """
-        Called to send Message previously stored
-        """
-        if not self._backuptoempty:
+    def forwardMessage(self, msg, source="bus"):
+        if isinstance(msg, domish.Element):
+            msg = self.convertXmlToNagios(msg)
+        if msg is None:
+            return defer.succeed(None) # on ignore
+        if source != "backup" and \
+                (self._sendingbackup or self._waitingforreplies):
+            self.storeMessage(msg)
             return
-        self._backuptoempty = False
-        # XXX Ce code peut potentiellement boucler indéfiniment...
-        while True:
-            msg = self.retry.unstore()
-            if msg is None:
-                break
-            yield threads.deferToThread(self.write_to_nagios, msg)
-        self.retry.vacuum()
+        d = threads.deferToThread(self.writeToNagios, msg)
+        d.addErrback(self._send_failed, msg)
+        return d
 
-    @defer.inlineCallbacks
-    def messageForward(self, data):
+    def convertXmlToNagios(self, data):
         """
-        function to forward the message to the pipe
+        Convertisseur entre un message de commande Nagios en XML et le format
+        attendu par Nagios
         """
         LOGGER.debug(_('Command message to forward: %s') % data.toXml())
-        if self._backuptoempty:
-            self.sendQueuedMessages()
         qualified_name = xml.namespaced_tag(data.uri, data.name)
         if qualified_name not in [xml.namespaced_tag(xml.NS_NAGIOS, 'command'),
-                                  xml.namespaced_tag(xml.NS_COMMAND, 'command')]:
+                                 xml.namespaced_tag(xml.NS_COMMAND, 'command')]:
             return
         cmd_timestamp = int(str(data.timestamp))
         cmd_name = str(data.cmdname)
@@ -107,43 +96,31 @@ class XMPPToPipeForwarder(PubSubClient):
                                                 ['accepted_commands'],
                          })
             return
-        msg = "[%s] %s;%s" % (cmd_timestamp, cmd_name, cmd_value)
-        yield threads.deferToThread(self.write_to_nagios, msg)
+        return "[%s] %s;%s" % (cmd_timestamp, cmd_name, cmd_value)
 
-    def write_to_nagios(self, msg):
-        try:
-            # testing there is a pipe (FIFO) which exist.
-            if not stat.S_ISFIFO(os.stat(self.pipe_filename).st_mode):
-                LOGGER.error(_('The configured nagios command pipe is not '
-                        'a FIFO. Storing message for later.'))
-                self.retry.store(msg)
-                self._backuptoempty = True
-                return
-            # XXX il serait possible d'aggréger les écritures si on flush
-            #  après chaque écriture (pour ne pas ouvrir/fermer le pipe à
-            # chaque fois
-            # (texte suivant issue du code de nsca)
+    def writeToNagios(self, msg):
+        # testing there is a pipe (FIFO) which exist.
+        if not stat.S_ISFIFO(os.stat(self.pipe_filename).st_mode):
+            raise WrongNagiosPipe()
+        # XXX il serait possible d'aggréger les écritures si on flush
+        #  après chaque écriture (pour ne pas ouvrir/fermer le pipe à
+        # chaque fois
+        # (texte suivant issue du code de nsca)
 # /* if we don't fflush() then we're writing in 4k non-CR-terminated blocks, and
 #  * anything else (eg. pscwatch) which writes to the file will be writing into
 #  * the middle of our commands.
 #  */
-            LOGGER.debug(_("Writing to %(pipe)s: %(msg)s") % {
-                'pipe': self.pipe_filename,
-                'msg': msg,
-            })
-            # cannot open in append mode, since that causes a seek
-            pipe = os.open(self.pipe_filename, os.O_WRONLY)
-            fcntl.flock(pipe, fcntl.LOCK_EX)
-            os.write(pipe, msg + '\n')
-            fcntl.flock(pipe, fcntl.LOCK_UN)
-            os.close(pipe)
-            return True
-        except OSError, e:
-            LOGGER.error(_('Unable to forward message %(error_message)s, '
-                           'this message is stored for later reemission.') % \
-                            {'error_message': str(e)})
-            self.retry.store(msg)
-            self._backuptoempty = True
+        LOGGER.debug("Writing to %(pipe)s: %(msg)s", {
+            'pipe': self.pipe_filename,
+            'msg': msg,
+        })
+        # cannot open in append mode, since that causes a seek
+        pipe = os.open(self.pipe_filename, os.O_WRONLY)
+        fcntl.flock(pipe, fcntl.LOCK_EX)
+        os.write(pipe, msg + '\n')
+        fcntl.flock(pipe, fcntl.LOCK_UN)
+        os.close(pipe)
+        return True
 
     def chatReceived(self, msg):
         """
@@ -153,18 +130,14 @@ class XMPPToPipeForwarder(PubSubClient):
         @type  msg: Xml object
 
         """
-        # TODO: ajouter des tests unitaires
-        from vigilo.common.conf import settings
-        settings.load_module(__name__)
-
         # Il ne devrait y avoir qu'un seul corps de message (body)
+        # TODO: ajouter des tests unitaires
         bodys = [element for element in msg.elements()
                          if element.name in ('body',)]
-
         for b in bodys:
             for data in b.elements():
                 # les données dont on a besoin sont juste en dessous
-                self.messageForward(data)
+                self.forwardMessage(data, source="bus")
 
     def itemsReceived(self, event):
         """
@@ -182,17 +155,14 @@ class XMPPToPipeForwarder(PubSubClient):
             # stderr pollution caused by http://bugs.python.org/issue5508
             # and some touchiness on domish attribute access.
             xmlstr = item.toXml()
-            LOGGER.debug(_(u'Got item: %s'), xmlstr)
+            LOGGER.debug(u'Got item: %s', xmlstr)
 
-            # @FIXME: il faudrait faire un refactoring du code
-            # pour évite la duplication de code entre cette méthode
-            # et la méthode chatReceived.
             if item.name != 'item':
                 # The alternative is 'retract', which we silently ignore
                 # We receive retractations in FIFO order,
                 # ejabberd keeps 10 items before retracting old items.
-                LOGGER.debug(_(u'Skipping unrecognized item (%s)'), item.name)
+                LOGGER.debug(u'Skipping unrecognized item (%s)', item.name)
                 continue
 
             data = item.firstChildElement()
-            self.messageForward(data)
+            self.forwardMessage(data, source="bus")
