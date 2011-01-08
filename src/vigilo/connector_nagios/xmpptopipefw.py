@@ -18,7 +18,7 @@ from vigilo.common.conf import settings
 settings.load_module(__name__)
 
 from vigilo.common.logging import get_logger
-from vigilo.connector.forwarder import PubSubForwarder, NotConnectedError
+from vigilo.connector.forwarder import PubSubListener, NotConnectedError
 from vigilo.connector.store import DbRetry
 LOGGER = get_logger(__name__)
 
@@ -30,7 +30,8 @@ class WrongNagiosPipe(NotConnectedError):
     def __str__(self):
         return _('the configured nagios command pipe is not a FIFO')
 
-class XMPPToPipeForwarder(PubSubForwarder):
+
+class XMPPToPipeForwarder(PubSubListener):
     """
     Receives messages from xmpp, and passes them to the pipe.
     Forward XMPP to pipe.
@@ -51,25 +52,16 @@ class XMPPToPipeForwarder(PubSubForwarder):
         """
         super(XMPPToPipeForwarder, self).__init__(dbfilename, dbtable)
         self.pipe_filename = pipe_filename
+        self.max_send_simult = 1
 
-    def connectionInitialized(self):
-        """
-        Redefinition in order to add a new observer for message type=chat
-        """
-        # Called when we are connected and authenticated
-        super(XMPPToPipeForwarder, self).connectionInitialized()
-        # add an observer to deal with chat message (oneToOne message)
-        self.xmlstream.addObserver("/message[@type='chat']", self.chatReceived)
+    def isConnected(self):
+        return stat.S_ISFIFO(os.stat(self.pipe_filename).st_mode)
 
-    def forwardMessage(self, msg, source="bus"):
+    def processMessage(self, msg):
         if isinstance(msg, domish.Element):
             msg = self.convertXmlToNagios(msg)
         if msg is None:
-            return defer.succeed(None) # on ignore
-        if source != "backup" and \
-                (self._sendingbackup or self._waitingforreplies):
-            self.storeMessage(msg)
-            return
+            return None
         d = threads.deferToThread(self.writeToNagios, msg)
         d.addErrback(self._send_failed, msg)
         return d
@@ -79,7 +71,7 @@ class XMPPToPipeForwarder(PubSubForwarder):
         Convertisseur entre un message de commande Nagios en XML et le format
         attendu par Nagios
         """
-        LOGGER.debug(_('Command message to forward: %s') % data.toXml())
+        LOGGER.debug('Command message to forward: %s', data.toXml())
         qualified_name = xml.namespaced_tag(data.uri, data.name)
         if qualified_name not in [xml.namespaced_tag(xml.NS_NAGIOS, 'command'),
                                  xml.namespaced_tag(xml.NS_COMMAND, 'command')]:
@@ -100,7 +92,7 @@ class XMPPToPipeForwarder(PubSubForwarder):
 
     def writeToNagios(self, msg):
         # testing there is a pipe (FIFO) which exist.
-        if not stat.S_ISFIFO(os.stat(self.pipe_filename).st_mode):
+        if not self.isConnected():
             raise WrongNagiosPipe()
         # XXX il serait possible d'aggréger les écritures si on flush
         #  après chaque écriture (pour ne pas ouvrir/fermer le pipe à
@@ -120,49 +112,4 @@ class XMPPToPipeForwarder(PubSubForwarder):
         os.write(pipe, msg + '\n')
         fcntl.flock(pipe, fcntl.LOCK_UN)
         os.close(pipe)
-        return True
 
-    def chatReceived(self, msg):
-        """
-        function to treat a received chat message
-
-        @param msg: msg to treat
-        @type  msg: Xml object
-
-        """
-        # Il ne devrait y avoir qu'un seul corps de message (body)
-        # TODO: ajouter des tests unitaires
-        bodys = [element for element in msg.elements()
-                         if element.name in ('body',)]
-        for b in bodys:
-            for data in b.elements():
-                # les données dont on a besoin sont juste en dessous
-                self.forwardMessage(data, source="bus")
-
-    def itemsReceived(self, event):
-        """
-        Méthode de traitement des messages arrivant
-        sur un nœud de publication auquel le connecteur
-        Nagios est abonné.
-        """
-        for item in event.items:
-            # Item is a domish.IElement and a domish.Element
-            # Serialize as XML before queueing,
-            # or we get harmless stderr pollution  × 5 lines:
-            # Exception RuntimeError: 'maximum recursion depth exceeded in
-            # __subclasscheck__' in <type 'exceptions.AttributeError'> ignored
-            #
-            # stderr pollution caused by http://bugs.python.org/issue5508
-            # and some touchiness on domish attribute access.
-            xmlstr = item.toXml()
-            LOGGER.debug(u'Got item: %s', xmlstr)
-
-            if item.name != 'item':
-                # The alternative is 'retract', which we silently ignore
-                # We receive retractations in FIFO order,
-                # ejabberd keeps 10 items before retracting old items.
-                LOGGER.debug(u'Skipping unrecognized item (%s)', item.name)
-                continue
-
-            data = item.firstChildElement()
-            self.forwardMessage(data, source="bus")

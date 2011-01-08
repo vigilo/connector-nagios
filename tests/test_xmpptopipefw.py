@@ -1,0 +1,72 @@
+# -*- coding: utf-8 -*-
+"""
+Teste l'envoi du bus vers le pipe Nagios
+"""
+import os
+import tempfile
+import shutil
+import unittest
+
+# ATTENTION: ne pas utiliser twisted.trial, car nose va ignorer les erreurs
+# produites par ce module !!!
+#from twisted.trial import unittest
+from nose.twistedtools import reactor, deferred
+
+from twisted.internet import defer
+from twisted.words.xish import domish
+
+from vigilo.connector_nagios.xmpptopipefw import XMPPToPipeForwarder
+from vigilo.pubsub.xml import NS_NAGIOS
+
+
+class TestForwarder(unittest.TestCase):
+    """Teste la sauvegarde locale de messages en cas d'erreur."""
+
+    @deferred(timeout=5)
+    def setUp(self):
+        self.tmpdir = tempfile.mkdtemp(prefix="test-connector-nagios-")
+        self.base = os.path.join(self.tmpdir, "backup.sqlite")
+        self.pipe = os.path.join(self.tmpdir, "pipe")
+        open(self.pipe, "w").close() # on crée le fichier
+        #os.mkfifo(self.pipe)
+        self.fwd = XMPPToPipeForwarder(self.pipe, self.base, "tobus")
+        return self.fwd.retry.initdb()
+
+    def tearDown(self):
+        shutil.rmtree(self.tmpdir)
+
+    @deferred(timeout=5)
+    def test_send_msg(self):
+        """Stockage local d'un message lorsque le bus est indisponible."""
+        # Preparation du message
+        msg = domish.Element((NS_NAGIOS, 'command'))
+        msg.addElement('timestamp', content="0")
+        msg.addElement('cmdname', content="PROCESS_SERVICE_CHECK_RESULT")
+        msg.addElement('value', content="test")
+        # Désactivation de la vérification du FIFO
+        setattr(self.fwd, "isConnected", lambda: True)
+        # Envoi du message
+        d = self.fwd.processMessage(msg)
+        def check_result(r):
+            self.failUnless(os.path.exists(self.pipe),
+                            "Rien n'a été écrit dans le pipe")
+            pipe = open(self.pipe, "r")
+            content = pipe.read()
+            self.assertEqual(content, "[0] PROCESS_SERVICE_CHECK_RESULT;test\n",
+                             "Le contenu du pipe n'est pas bon")
+            pipe.close()
+        d.addCallback(check_result)
+        return d
+
+    def test_convertToNagios(self):
+        msg = domish.Element((NS_NAGIOS, 'command'))
+        msg.addElement('timestamp', content="0")
+        msg.addElement('cmdname', content="PROCESS_SERVICE_CHECK_RESULT")
+        msg.addElement('value', content="test")
+        result = self.fwd.convertXmlToNagios(msg)
+        self.assertEqual(result, "[0] PROCESS_SERVICE_CHECK_RESULT;test",
+                         "La conversion en commande Nagios n'est pas bonne")
+
+if __name__ == "__main__": 
+    unittest.main()
+
