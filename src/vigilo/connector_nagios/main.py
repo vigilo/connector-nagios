@@ -29,6 +29,7 @@ class ConnectorServiceMaker(object):
 
         from vigilo.connector_nagios.xmpptopipefw import XMPPToPipeForwarder
         from vigilo.connector.sockettonodefw import SocketToNodeForwarder
+        from vigilo.connector.status import StatusPublisher
 
         xmpp_client = client.client_factory(settings)
 
@@ -86,6 +87,13 @@ class ConnectorServiceMaker(object):
                     sr, bkpfile,
                     settings['connector']['backup_table_to_bus'])
             message_publisher.setHandlerParent(xmpp_client)
+
+        # Statistiques
+        stats_publisher = StatusPublisher(
+                            message_publisher,
+                            settings["connector"].get("hostname", None),
+                            "vigilo-connector-nagios")
+        stats_publisher.setHandlerParent(xmpp_client)
 
         root_service = service.MultiService()
         xmpp_client.setServiceParent(root_service)

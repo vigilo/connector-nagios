@@ -43,11 +43,11 @@ make PYTHON=%{__python}
 %install
 rm -rf $RPM_BUILD_ROOT
 make install \
-	DESTDIR=$RPM_BUILD_ROOT \
-	PREFIX=%{_prefix} \
-	SYSCONFDIR=%{_sysconfdir} \
-	LOCALSTATEDIR=%{_localstatedir} \
-	PYTHON=%{__python}
+    DESTDIR=$RPM_BUILD_ROOT \
+    PREFIX=%{_prefix} \
+    SYSCONFDIR=%{_sysconfdir} \
+    LOCALSTATEDIR=%{_localstatedir} \
+    PYTHON=%{__python}
 
 %find_lang %{name}
 
@@ -63,8 +63,8 @@ exit 0
 
 %preun
 if [ $1 = 0 ]; then
-	/sbin/service %{name} stop > /dev/null 2>&1 || :
-	/sbin/chkconfig --del %{name} || :
+    /sbin/service %{name} stop > /dev/null 2>&1 || :
+    /sbin/chkconfig --del %{name} || :
 fi
 
 
