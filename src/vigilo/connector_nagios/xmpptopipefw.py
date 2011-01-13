@@ -1,7 +1,7 @@
 # vim: set fileencoding=utf-8 sw=4 ts=4 et :
 
 """
-Extends pubsub clients to compute Node message.
+Extends pubsub clients to compute code message.
 """
 from __future__ import absolute_import
 
@@ -73,16 +73,28 @@ class XMPPToPipeForwarder(PubSubListener):
         """
         LOGGER.debug('Command message to forward: %s', data.toXml())
         qualified_name = xml.namespaced_tag(data.uri, data.name)
-        if qualified_name not in [xml.namespaced_tag(xml.NS_NAGIOS, 'command'),
-                                 xml.namespaced_tag(xml.NS_COMMAND, 'command')]:
+        
+        if qualified_name in [xml.namespaced_tag(xml.NS_NAGIOS, 'command'),
+                              xml.namespaced_tag(xml.NS_COMMAND, 'command')]:
+
+            cmd_timestamp = int(str(data.timestamp))
+            cmd_name = str(data.cmdname)
+            cmd_value = str(data.value)
+            
+        elif qualified_name == xml.namespaced_tag(xml.NS_STATE, 'state'):
+            cmd_timestamp = int(str(data.timestamp))
+            if str(data.service):
+                cmd_name = 'PROCESS_SERVICE_CHECK_RESULT'
+                cmd_value = "%s;%s;%s;%s" % (str(data.host), str(data.service), str(data.return_code), str(data.message))
+            else:
+                cmd_name = 'PROCESS_HOST_CHECK_RESULT'
+                cmd_value = "%s;%s;%s" % (str(data.host), str(data.return_code), str(data.message))
+        else:
             return
-        cmd_timestamp = int(str(data.timestamp))
-        cmd_name = str(data.cmdname)
-        cmd_value = str(data.value)
-        if cmd_name not in \
-            settings['connector-nagios']['accepted_commands']:
+            
+        if cmd_name not in settings['connector-nagios']['accepted_commands']:
             LOGGER.error(_("Command '%(received)s' disallowed by "
-                        "policy, accepted commands: %(accepted)r") % {
+                           "policy, accepted commands: %(accepted)r") % {
                             'received': data.cmdname,
                             'accepted': settings['connector-nagios']
                                                 ['accepted_commands'],
