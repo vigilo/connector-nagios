@@ -77,12 +77,12 @@ class XMPPToPipeForwarder(PubSubListener):
         if qualified_name in [xml.namespaced_tag(xml.NS_NAGIOS, 'command'),
                               xml.namespaced_tag(xml.NS_COMMAND, 'command')]:
 
-            cmd_timestamp = int(str(data.timestamp))
+            cmd_timestamp = float(str(data.timestamp))
             cmd_name = str(data.cmdname)
             cmd_value = str(data.value)
             
         elif qualified_name == xml.namespaced_tag(xml.NS_STATE, 'state'):
-            cmd_timestamp = int(str(data.timestamp))
+            cmd_timestamp = float(str(data.timestamp))
             if str(data.service):
                 cmd_name = 'PROCESS_SERVICE_CHECK_RESULT'
                 cmd_value = "%s;%s;%s;%s" % (str(data.host), str(data.service), str(data.return_code), str(data.message))
