@@ -64,7 +64,7 @@ class TestForwarder(unittest.TestCase):
         msg.addElement('cmdname', content="PROCESS_SERVICE_CHECK_RESULT")
         msg.addElement('value', content="test")
         result = self.fwd.convertXmlToNagios(msg)
-        self.assertEqual(result, "[0] PROCESS_SERVICE_CHECK_RESULT;test",
+        self.assertEqual(result, "[0.0] PROCESS_SERVICE_CHECK_RESULT;test",
                          "La conversion en commande Nagios n'est pas bonne")
 
         msg = domish.Element((NS_STATE, 'state'))
@@ -78,7 +78,7 @@ class TestForwarder(unittest.TestCase):
         msg.addElement('message', content='WARNING: Load average is above 4 (4.5)')
 
         result = self.fwd.convertXmlToNagios(msg)
-        self.assertEqual(result, "[1239104006] PROCESS_SERVICE_CHECK_RESULT;server.example.com;Load;1;WARNING: Load average is above 4 (4.5)",
+        self.assertEqual(result, "[1239104006.0] PROCESS_SERVICE_CHECK_RESULT;server.example.com;Load;1;WARNING: Load average is above 4 (4.5)",
                          "La conversion en commande Nagios n'est pas bonne")
 
         msg = domish.Element((NS_STATE, 'state'))
@@ -92,10 +92,9 @@ class TestForwarder(unittest.TestCase):
         msg.addElement('message', content='CRITICAL: Host unreachable (192.168.1.1)')
 
         result = self.fwd.convertXmlToNagios(msg)
-        self.assertEqual(result, "[1239104006] PROCESS_HOST_CHECK_RESULT;server.example.com;2;CRITICAL: Host unreachable (192.168.1.1)",
+        self.assertEqual(result, "[1239104006.0] PROCESS_HOST_CHECK_RESULT;server.example.com;2;CRITICAL: Host unreachable (192.168.1.1)",
                          "La conversion en commande Nagios n'est pas bonne")
 
 
-if __name__ == "__main__": 
+if __name__ == "__main__":
     unittest.main()
-
