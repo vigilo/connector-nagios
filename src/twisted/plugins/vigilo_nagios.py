@@ -1,5 +1,5 @@
 # vim: set fileencoding=utf-8 sw=4 ts=4 et :
-""" Nagios connector Pubsub client. """
+"""Nagios connector"""
 from __future__ import absolute_import, with_statement
 import os
 
@@ -11,7 +11,7 @@ from twisted.words.protocols.jabber.jid import JID
 from vigilo.common.gettext import translate
 from vigilo.connector import client, options
 
-_ = translate('vigilo.connector_metro')
+_ = translate('vigilo.connector_nagios')
 
 class NagiosConnectorServiceMaker(object):
     """
@@ -19,21 +19,19 @@ class NagiosConnectorServiceMaker(object):
     """
     implements(service.IServiceMaker, IPlugin)
     tapname = "vigilo-nagios"
-    description = "Vigilo connector (for Nagios)"
+    description = "Vigilo connector for Nagios"
     options = options.Options
 
     def makeService(self, options):
         """ the service that wraps everything the connector needs. """
         from vigilo.common.conf import settings
-        settings.load_module('vigilo.connector_metro')
+        settings.load_module('vigilo.connector_nagios')
 
         from vigilo.common.logging import get_logger
-        LOGGER = get_logger('vigilo.connector_metro')
+        LOGGER = get_logger('vigilo.connector_nagios')
 
         from vigilo.connector_nagios.xmpptopipefw import XMPPToPipeForwarder
         from vigilo.connector.sockettonodefw import SocketToNodeForwarder
-        from vigilo.connector.presence import PresenceManager
-        from vigilo.connector.status import StatusPublisher
 
         xmpp_client = client.client_factory(settings)
 
@@ -93,12 +91,16 @@ class NagiosConnectorServiceMaker(object):
             message_publisher.setHandlerParent(xmpp_client)
 
         # Présence
+        from vigilo.connector.presence import PresenceManager
         presence_manager = PresenceManager()
         presence_manager.setHandlerParent(xmpp_client)
 
         # Statistiques
+        from vigilo.connector.status import StatusPublisher
+        servicename = options.get("name", "vigilo-connector-nagios")
         stats_publisher = StatusPublisher(message_publisher,
-                            settings["connector"].get("hostname", None))
+                            settings["connector"].get("hostname", None),
+                            servicename=servicename)
         stats_publisher.setHandlerParent(xmpp_client)
 
         root_service = service.MultiService()
