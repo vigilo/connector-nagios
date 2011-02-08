@@ -52,7 +52,7 @@ class TestForwarder(unittest.TestCase):
                             "Rien n'a été écrit dans le pipe")
             pipe = open(self.pipe, "r")
             content = pipe.read()
-            self.assertEqual(content, "[0] PROCESS_SERVICE_CHECK_RESULT;test\n",
+            self.assertEqual(content, "[0.0] PROCESS_SERVICE_CHECK_RESULT;test\n",
                              "Le contenu du pipe n'est pas bon")
             pipe.close()
         d.addCallback(check_result)
