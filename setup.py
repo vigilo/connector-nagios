@@ -49,7 +49,9 @@ setup(name='vigilo-connector-nagios',
         packages=[
             'vigilo',
             'vigilo.connector_nagios',
+            'twisted',
             ],
+        package_data={'twisted': ['plugins/vigilo_nagios.py']},
         message_extractors={
             'src': [
                 ('**.py', 'python', None),
