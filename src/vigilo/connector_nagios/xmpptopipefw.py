@@ -15,7 +15,6 @@ from wokkel import xmppim
 from vigilo.pubsub import xml
 
 from vigilo.common.conf import settings
-settings.load_module(__name__)
 
 from vigilo.common.logging import get_logger
 from vigilo.connector.forwarder import PubSubListener, NotConnectedError

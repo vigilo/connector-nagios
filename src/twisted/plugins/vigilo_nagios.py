@@ -25,7 +25,10 @@ class NagiosConnectorServiceMaker(object):
     def makeService(self, options):
         """ the service that wraps everything the connector needs. """
         from vigilo.common.conf import settings
-        settings.load_module('vigilo.connector_nagios')
+        if options["config"] is not None:
+            settings.load_file(options["config"])
+        else:
+            settings.load_module('vigilo.connector_nagios')
 
         from vigilo.common.logging import get_logger
         LOGGER = get_logger('vigilo.connector_nagios')
