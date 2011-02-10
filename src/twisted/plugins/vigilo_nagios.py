@@ -1,5 +1,5 @@
 # vim: set fileencoding=utf-8 sw=4 ts=4 et :
-"""Nagios connector"""
+"""Nagios <-> XMPP connector"""
 from __future__ import absolute_import, with_statement
 import os
 
@@ -100,10 +100,13 @@ class NagiosConnectorServiceMaker(object):
 
         # Statistiques
         from vigilo.connector.status import StatusPublisher
-        servicename = options.get("name", "vigilo-connector-nagios")
+        servicename = options["name"]
+        if servicename is None:
+            servicename = "vigilo-connector-nagios"
         stats_publisher = StatusPublisher(message_publisher,
-                            settings["connector"].get("hostname", None),
-                            servicename=servicename)
+                        settings["connector"].get("hostname", None),
+                        servicename=servicename,
+                        node=settings["connector"].get("status_node", None))
         stats_publisher.setHandlerParent(xmpp_client)
 
         root_service = service.MultiService()
