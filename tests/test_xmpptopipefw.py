@@ -15,6 +15,9 @@ from nose.twistedtools import reactor, deferred
 from twisted.internet import defer
 from twisted.words.xish import domish
 
+from vigilo.common.conf import settings
+settings.load_module(__name__)
+
 from vigilo.connector_nagios.xmpptopipefw import XMPPToPipeForwarder
 from vigilo.pubsub.xml import NS_NAGIOS, NS_STATE
 
