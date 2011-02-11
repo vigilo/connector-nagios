@@ -70,7 +70,6 @@ class XMPPToPipeForwarder(PubSubListener):
         Convertisseur entre un message de commande Nagios en XML et le format
         attendu par Nagios
         """
-        LOGGER.debug('Command message to forward: %s', data.toXml())
         qualified_name = xml.namespaced_tag(data.uri, data.name)
         
         if qualified_name in [xml.namespaced_tag(xml.NS_NAGIOS, 'command'),
@@ -84,13 +83,14 @@ class XMPPToPipeForwarder(PubSubListener):
             cmd_timestamp = float(str(data.timestamp))
             if str(data.service):
                 cmd_name = 'PROCESS_SERVICE_CHECK_RESULT'
-                cmd_value = "%s;%s;%s;%s" % (str(data.host), str(data.service), str(data.return_code), str(data.message))
+                cmd_value = "%s;%s;%s;%s" % (str(data.host), str(data.service), str(data.code), str(data.message))
             else:
                 cmd_name = 'PROCESS_HOST_CHECK_RESULT'
-                cmd_value = "%s;%s;%s" % (str(data.host), str(data.return_code), str(data.message))
+                cmd_value = "%s;%s;%s" % (str(data.host), str(data.code), str(data.message))
         else:
             return
             
+        LOGGER.debug('Command message to forward: %s', data.toXml())
         if cmd_name not in settings['connector-nagios']['accepted_commands']:
             LOGGER.error(_("Command '%(received)s' disallowed by "
                            "policy, accepted commands: %(accepted)r") % {
