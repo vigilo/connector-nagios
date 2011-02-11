@@ -12,17 +12,22 @@ URL:        http://www.projet-vigilo.org
 Group:      System/Servers
 BuildRoot:  %{_tmppath}/%{name}-%{version}-%{release}-build
 License:    GPLv2
+Buildarch:  noarch
 
 BuildRequires:   python-distribute
 BuildRequires:   python-babel
 
-Requires:   socat
 Requires:   python-distribute
 Requires:   vigilo-common vigilo-connector
 Requires:   nagios
 
-Buildarch:  noarch
 
+Requires(pre): shadow-utils
+Requires(post): chkconfig
+Requires(preun): chkconfig
+# This is for /sbin/service
+Requires(preun): initscripts
+Requires(postun): initscripts
 
 %description
 Gateway from Nagios to the Vigilo message bus (XMPP) and back to Nagios.
@@ -53,12 +58,16 @@ exit 0
 
 %post
 /sbin/chkconfig --add %{name} || :
-/sbin/service %{name} condrestart > /dev/null 2>&1 || :
 
 %preun
 if [ $1 = 0 ]; then
     /sbin/service %{name} stop > /dev/null 2>&1 || :
     /sbin/chkconfig --del %{name} || :
+fi
+
+%postun
+if [ "$1" -ge "1" ] ; then
+    /sbin/service %{name} condrestart > /dev/null 2>&1 || :
 fi
 
 
@@ -77,7 +86,6 @@ rm -rf $RPM_BUILD_ROOT
 %{python_sitelib}/*
 %dir %{_localstatedir}/lib/vigilo
 %attr(-,vigilo-nagios,vigilo-nagios) %{_localstatedir}/lib/vigilo/%{module}
-%attr(-,vigilo-nagios,vigilo-nagios) %{_localstatedir}/run/%{name}
 
 
 %changelog

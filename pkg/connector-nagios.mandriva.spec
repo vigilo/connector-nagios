@@ -12,11 +12,11 @@ URL:        http://www.projet-vigilo.org
 Group:      System/Servers
 BuildRoot:  %{_tmppath}/%{name}-%{version}-%{release}-build
 License:    GPLv2
+Buildarch:  noarch
 
 BuildRequires:   python-setuptools
 BuildRequires:   python-babel
 
-Requires:   socat
 Requires:   python >= 2.5
 Requires:   python-setuptools
 Requires:   vigilo-common vigilo-connector
@@ -35,7 +35,6 @@ Requires:   python-setuptools
 
 Requires(pre): rpm-helper
 
-Buildarch:  noarch
 
 
 %description
@@ -86,7 +85,6 @@ rm -rf $RPM_BUILD_ROOT
 %{python_sitelib}/*
 %dir %{_localstatedir}/lib/vigilo
 %attr(-,vigilo-nagios,vigilo-nagios) %{_localstatedir}/lib/vigilo/%{module}
-%attr(-,vigilo-nagios,vigilo-nagios) %{_localstatedir}/run/%{name}
 
 
 %changelog

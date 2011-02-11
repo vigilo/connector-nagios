@@ -35,10 +35,9 @@ setup(name='vigilo-connector-nagios',
         description='vigilo nagios connector component',
         license='http://www.gnu.org/licenses/gpl-2.0.html',
         long_description='The vigilo nagios connector component is a connector between:\n'
-        +'   - XMPP/PubSub BUS of message\n'
+        +'   - XMPP/PubSub message bus\n'
         +'   - nagios\n',
         install_requires=[
-            # dashes become underscores
             'setuptools',
             'vigilo-common',
             'vigilo-connector',
@@ -62,15 +61,14 @@ setup(name='vigilo-connector-nagios',
         },
         entry_points={
             'console_scripts': [
-                'vigilo-connector-nagios = vigilo.connector_nagios.main:main',
+                'vigilo-connector-nagios = twisted.scripts.twistd:run',
                 ],
-            },
+        },
         package_dir={'': 'src'},
         data_files=[
                     (os.path.join(sysconfdir, "vigilo/connector-nagios"),
                         ["settings.ini"]),
                     (os.path.join(localstatedir, "lib/vigilo/connector-nagios"), []),
-                    (os.path.join(localstatedir, "run/vigilo-connector-nagios"), []),
                    ] + install_i18n("i18n", os.path.join(sys.prefix, 'share', 'locale')),
         )
 
