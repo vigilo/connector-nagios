@@ -23,7 +23,7 @@ require_tls = False
 # Liste des noms des topics auxquels le connecteur est abonné,
 # séparés par des virgules.
 # Si la liste est vide, mettre uniquement une virgule.
-subscriptions = /vigilo/command,/vigilo/state
+subscriptions = /vigilo/command
 
 # Le trafic lié au bus XMPP doit-il être enregistré dans les logs ?
 log_traffic = False
