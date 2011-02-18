@@ -86,6 +86,7 @@ rm -rf $RPM_BUILD_ROOT
 %{python_sitelib}/*
 %dir %{_localstatedir}/lib/vigilo
 %attr(-,vigilo-nagios,vigilo-nagios) %{_localstatedir}/lib/vigilo/%{module}
+%attr(-,vigilo-nagios,vigilo-nagios) %{_localstatedir}/run/%{name}
 
 
 %changelog
