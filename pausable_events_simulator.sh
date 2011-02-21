@@ -4,14 +4,14 @@ if [[ "$1" == "--help" || "$1" == "-h" ]] ; then
 fi
 
 # les états nagios
-STATE=(CRITICAL WARNING UNKNOWN OK OK)
+STATE=(CRITICAL CRITICAL WARNING UNKNOWN OK OK)
 # les services supervisés
 # L'entrée '' permet d'envoyer des alertes sur les hôtes directement.
-INDICATEUR=('Interface eth0' 'Interface eth1' 'Interface eth2' '' 'HTTPd' 'CPU' 'Processes' 'Load' 'UpTime')
+INDICATEUR=(Collector 'Ping')
 # la liste des serveurs
 # La valeur 'HLS' est réservée et correspond
 # aux services de haut niveau (High-Level Services).
-SERVER=(host2.example.com host1.example.com proto4 messagerie brouteur)
+SERVER=(localhost localhost2)
 
 
 function random() {
@@ -65,7 +65,7 @@ while true; do
     ser=`random_serveur`
     ser_name=`echo $ser | awk -F" " '{ print $1 }'`
     sta=`random_state`
-    echo "event|$seconde|$ser_name|$ind|$sta|$sta:  $ind:  $value  $value  $value"
+    echo "event|$seconde|$ser_name|$ind|$sta|$sta:  $ind:  $@"
     echo "Please press Enter to send a new event..." >&2
     read pause
 done
