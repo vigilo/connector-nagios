@@ -65,13 +65,13 @@ make install \
 
 %post
 %_post_service %{name}
-%{_libdir}/twisted-dropin-cache > /dev/null || :
+%{_libdir}/twisted-dropin-cache > /dev/null 2>&1 || :
 
 %preun
 %_preun_service %{name}
 
 %postun
-%{_libdir}/twisted-dropin-cache > /dev/null || :
+%{_libdir}/twisted-dropin-cache > /dev/null 2>&1 || :
 
 %clean
 rm -rf $RPM_BUILD_ROOT
