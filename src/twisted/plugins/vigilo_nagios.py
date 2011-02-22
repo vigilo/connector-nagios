@@ -9,7 +9,8 @@ from twisted.application import service
 from twisted.words.protocols.jabber.jid import JID
 
 from vigilo.common.gettext import translate
-from vigilo.connector import client, options
+from vigilo.connector import client
+from vigilo.connector import options as base_options
 
 _ = translate('vigilo.connector_nagios')
 
@@ -20,7 +21,7 @@ class NagiosConnectorServiceMaker(object):
     implements(service.IServiceMaker, IPlugin)
     tapname = "vigilo-nagios"
     description = "Vigilo connector for Nagios"
-    options = options.Options
+    options = base_options.Options
 
     def makeService(self, options):
         """ the service that wraps everything the connector needs. """
