@@ -8,24 +8,21 @@ from __future__ import absolute_import
 import os
 import stat
 import fcntl
-from twisted.internet import defer, threads
+from twisted.internet import threads
 from twisted.words.xish import domish
-from wokkel.pubsub import PubSubClient
-from wokkel import xmppim
 from vigilo.pubsub import xml
 
 from vigilo.common.conf import settings
 
 from vigilo.common.logging import get_logger
-from vigilo.connector.forwarder import PubSubListener, NotConnectedError
-from vigilo.connector.store import DbRetry
+from vigilo.connector.forwarder import PubSubListener
 LOGGER = get_logger(__name__)
 
 from vigilo.common.gettext import translate
 _ = translate(__name__)
 
 
-class WrongNagiosPipe(NotConnectedError):
+class WrongNagiosPipe(Exception):
     def __str__(self):
         return _('the configured nagios command pipe is not a FIFO')
 
@@ -71,25 +68,27 @@ class XMPPToPipeForwarder(PubSubListener):
         attendu par Nagios
         """
         qualified_name = xml.namespaced_tag(data.uri, data.name)
-        
+
         if qualified_name in [xml.namespaced_tag(xml.NS_NAGIOS, 'command'),
                               xml.namespaced_tag(xml.NS_COMMAND, 'command')]:
 
             cmd_timestamp = float(str(data.timestamp))
             cmd_name = str(data.cmdname)
             cmd_value = str(data.value)
-            
+
         elif qualified_name == xml.namespaced_tag(xml.NS_STATE, 'state'):
             cmd_timestamp = float(str(data.timestamp))
             if str(data.service):
                 cmd_name = 'PROCESS_SERVICE_CHECK_RESULT'
-                cmd_value = "%s;%s;%s;%s" % (str(data.host), str(data.service), str(data.code), str(data.message))
+                cmd_value = "%s;%s;%s;%s" % (str(data.host), str(data.service),
+                                             str(data.code), str(data.message))
             else:
                 cmd_name = 'PROCESS_HOST_CHECK_RESULT'
-                cmd_value = "%s;%s;%s" % (str(data.host), str(data.code), str(data.message))
+                cmd_value = "%s;%s;%s" % (str(data.host), str(data.code),
+                                          str(data.message))
         else:
             return
-            
+
         LOGGER.debug('Command message to forward: %s', data.toXml())
         if cmd_name not in settings['connector-nagios']['accepted_commands']:
             LOGGER.error(_("Command '%(received)s' disallowed by "

@@ -10,9 +10,8 @@ import unittest
 # ATTENTION: ne pas utiliser twisted.trial, car nose va ignorer les erreurs
 # produites par ce module !!!
 #from twisted.trial import unittest
-from nose.twistedtools import reactor, deferred
+from nose.twistedtools import deferred
 
-from twisted.internet import defer
 from twisted.words.xish import domish
 
 from vigilo.common.conf import settings
@@ -55,8 +54,8 @@ class TestForwarder(unittest.TestCase):
                             "Rien n'a été écrit dans le pipe")
             pipe = open(self.pipe, "r")
             content = pipe.read()
-            self.assertEqual(content, "[0.0] PROCESS_SERVICE_CHECK_RESULT;test\n",
-                             "Le contenu du pipe n'est pas bon")
+            self.assertEqual(content, "[0.0] PROCESS_SERVICE_CHECK_RESULT;"
+                    "test\n", "Le contenu du pipe n'est pas bon")
             pipe.close()
         d.addCallback(check_result)
         return d
@@ -78,11 +77,13 @@ class TestForwarder(unittest.TestCase):
         msg.addElement('code', content='1')
         msg.addElement('type', content='HARD')
         msg.addElement('attempt', content='2')
-        msg.addElement('message', content='WARNING: Load average is above 4 (4.5)')
+        msg.addElement('message', content='WARNING: Load average is above '
+                                          '4 (4.5)')
 
         result = self.fwd.convertXmlToNagios(msg)
-        self.assertEqual(result, "[1239104006.0] PROCESS_SERVICE_CHECK_RESULT;server.example.com;Load;1;WARNING: Load average is above 4 (4.5)",
-                         "La conversion en commande Nagios n'est pas bonne")
+        self.assertEqual(result, "[1239104006.0] PROCESS_SERVICE_CHECK_RESULT;"
+                "server.example.com;Load;1;WARNING: Load average is above 4 "
+                "(4.5)", "La conversion en commande Nagios n'est pas bonne")
 
         msg = domish.Element((NS_STATE, 'state'))
         msg.addElement('timestamp', content='1239104006')
@@ -92,11 +93,13 @@ class TestForwarder(unittest.TestCase):
         msg.addElement('code', content='2')
         msg.addElement('type', content='HARD')
         msg.addElement('attempt', content='2')
-        msg.addElement('message', content='CRITICAL: Host unreachable (192.168.1.1)')
+        msg.addElement('message', content="CRITICAL: Host unreachable "
+                                          "(192.168.1.1)")
 
         result = self.fwd.convertXmlToNagios(msg)
-        self.assertEqual(result, "[1239104006.0] PROCESS_HOST_CHECK_RESULT;server.example.com;2;CRITICAL: Host unreachable (192.168.1.1)",
-                         "La conversion en commande Nagios n'est pas bonne")
+        self.assertEqual(result, "[1239104006.0] PROCESS_HOST_CHECK_RESULT;"
+                "server.example.com;2;CRITICAL: Host unreachable (192.168.1.1)",
+                 "La conversion en commande Nagios n'est pas bonne")
 
 
 if __name__ == "__main__":
