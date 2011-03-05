@@ -48,6 +48,7 @@ setup(name='vigilo-connector-nagios',
         packages=[
             'vigilo',
             'vigilo.connector_nagios',
+            'vigilo.connector_nagios.test',
             'twisted',
             ],
         package_data={'twisted': ['plugins/vigilo_nagios.py']},
