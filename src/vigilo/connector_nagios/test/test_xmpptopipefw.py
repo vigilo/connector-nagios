@@ -24,7 +24,7 @@ from vigilo.pubsub.xml import NS_NAGIOS, NS_STATE
 class TestForwarder(unittest.TestCase):
     """Teste la sauvegarde locale de messages en cas d'erreur."""
 
-    @deferred(timeout=5)
+    @deferred(timeout=30)
     def setUp(self):
         self.tmpdir = tempfile.mkdtemp(prefix="test-connector-nagios-")
         self.base = os.path.join(self.tmpdir, "backup.sqlite")
