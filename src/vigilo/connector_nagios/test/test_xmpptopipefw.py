@@ -24,15 +24,12 @@ from vigilo.pubsub.xml import NS_NAGIOS, NS_STATE
 class TestForwarder(unittest.TestCase):
     """Teste la sauvegarde locale de messages en cas d'erreur."""
 
-    @deferred(timeout=30)
     def setUp(self):
         self.tmpdir = tempfile.mkdtemp(prefix="test-connector-nagios-")
-        self.base = os.path.join(self.tmpdir, "backup.sqlite")
         self.pipe = os.path.join(self.tmpdir, "pipe")
         open(self.pipe, "w").close() # on crée le fichier
         #os.mkfifo(self.pipe)
-        self.fwd = XMPPToPipeForwarder(self.pipe, self.base, "tobus")
-        return self.fwd.retry.initdb()
+        self.fwd = XMPPToPipeForwarder(self.pipe, None, None)
 
     def tearDown(self):
         shutil.rmtree(self.tmpdir)
@@ -61,6 +58,9 @@ class TestForwarder(unittest.TestCase):
         return d
 
     def test_convertToNagios(self):
+        """
+        Un message "command" à destination de Nagios doit être converti dans le bon format
+        """
         msg = domish.Element((NS_NAGIOS, 'command'))
         msg.addElement('timestamp', content="0")
         msg.addElement('cmdname', content="PROCESS_SERVICE_CHECK_RESULT")
