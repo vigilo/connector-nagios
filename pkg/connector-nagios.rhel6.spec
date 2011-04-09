@@ -1,14 +1,11 @@
-%define module  connector-nagios
-%define name    vigilo-%{module}
-%define version 2.0.0
-%define release 1%{?svn}%{?dist}
+%define module  @SHORT_NAME@
 
-Name:       %{name}
-Summary:    Vigilo-Nagios connector
-Version:    %{version}
-Release:    %{release}
+Name:       vigilo-%{module}
+Summary:    @SUMMARY@
+Version:    @VERSION@
+Release:    1%{?svn}%{?dist}
 Source0:    %{name}-%{version}.tar.gz
-URL:        http://www.projet-vigilo.org
+URL:        @URL@
 Group:      System/Servers
 BuildRoot:  %{_tmppath}/%{name}-%{version}-%{release}-build
 License:    GPLv2
@@ -22,6 +19,7 @@ Requires:   vigilo-common vigilo-connector
 Requires:   nagios
 
 
+# Init
 Requires(pre): shadow-utils
 Requires(post): chkconfig
 Requires(preun): chkconfig
@@ -30,7 +28,7 @@ Requires(preun): initscripts
 Requires(postun): initscripts
 
 %description
-Gateway from Nagios to the Vigilo message bus (XMPP) and back to Nagios.
+@DESCRIPTION@
 This application is part of the Vigilo Project <http://vigilo-project.org>
 
 %prep

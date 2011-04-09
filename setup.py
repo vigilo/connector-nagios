@@ -32,11 +32,10 @@ setup(name='vigilo-connector-nagios',
         author='Vigilo Team',
         author_email='contact@projet-vigilo.org',
         url='http://www.projet-vigilo.org/',
-        description='vigilo nagios connector component',
+        description="Vigilo-Nagios connector",
         license='http://www.gnu.org/licenses/gpl-2.0.html',
-        long_description='The vigilo nagios connector component is a connector between:\n'
-        +'   - XMPP/PubSub message bus\n'
-        +'   - nagios\n',
+        long_description="Gateway from Nagios to the Vigilo message "
+                         "bus (XMPP) and back to Nagios.",
         install_requires=[
             'setuptools',
             'vigilo-common',
