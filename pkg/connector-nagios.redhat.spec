@@ -41,11 +41,10 @@ This application is part of the Vigilo Project <http://vigilo-project.org>
 %setup -q
 
 %build
-make PYTHON=%{__python}
 
 %install
 rm -rf $RPM_BUILD_ROOT
-make install \
+make install_pkg \
     DESTDIR=$RPM_BUILD_ROOT \
     PREFIX=%{_prefix} \
     SYSCONFDIR=%{_sysconfdir} \

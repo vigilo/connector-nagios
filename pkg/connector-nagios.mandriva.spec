@@ -42,16 +42,15 @@ This application is part of the Vigilo Project <http://vigilo-project.org>
 %setup -q
 
 %build
-make PYTHON=%{_bindir}/python
 
 %install
 rm -rf $RPM_BUILD_ROOT
-make install \
+make install_pkg \
     DESTDIR=$RPM_BUILD_ROOT \
     PREFIX=%{_prefix} \
     SYSCONFDIR=%{_sysconfdir} \
     LOCALSTATEDIR=%{_localstatedir} \
-    PYTHON=%{_bindir}/python
+    PYTHON=%{__python}
 
 %find_lang %{name}
 
