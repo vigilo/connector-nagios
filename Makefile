@@ -32,7 +32,7 @@ install_permissions:
 		-c 'Vigilo connector-nagios user' $(USER)
 	chown $(USER):$(USER) \
 			$(DESTDIR)$(LOCALSTATEDIR)/lib/vigilo/$(NAME) \
-            $(DESTDIR)$(LOCALSTATEDIR)/run/$(PKGNAME) \
+			$(DESTDIR)$(LOCALSTATEDIR)/run/$(PKGNAME)
 	chown root:$(USER) $(DESTDIR)$(SYSCONFDIR)/vigilo/$(NAME)/settings.ini
 	chmod 640 $(DESTDIR)$(SYSCONFDIR)/vigilo/$(NAME)/settings.ini
 
