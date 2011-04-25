@@ -53,7 +53,8 @@ class XMPPToPipeForwarder(PubSubListener):
         self.max_send_simult = 1
 
     def isConnected(self):
-        return stat.S_ISFIFO(os.stat(self.pipe_filename).st_mode)
+        return (os.path.exists(self.pipe_filename) and
+                stat.S_ISFIFO(os.stat(self.pipe_filename).st_mode))
 
     def processMessage(self, msg):
         if isinstance(msg, domish.Element):
