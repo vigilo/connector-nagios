@@ -10,8 +10,8 @@ settings.ini: settings.ini.in
 		-e 's,@NAGIOSCMDPIPE@,$(NAGIOSCMDPIPE),g' $^ > $@
 
 install: build install_python install_data install_permissions
-    # regénérer le dropin.cache de twisted
-    -$(PYTHON) -c "from twisted.scripts.twistd import run; run()" > /dev/null 2>&1
+	# regénérer le dropin.cache de twisted
+	-$(PYTHON) -c "from twisted.scripts.twistd import run; run()" > /dev/null 2>&1
 install_pkg: build install_python_pkg install_data
 
 install_python: settings.ini $(PYTHON)
@@ -45,3 +45,5 @@ lint: lint_pylint
 tests: tests_nose
 
 .PHONY: install_pkg install_python install_python_pkg install_data install_permissions
+
+# vim: set noexpandtab :
