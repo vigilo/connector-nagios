@@ -17,6 +17,7 @@ BuildRequires:   python-babel
 Requires:   python-distribute
 Requires:   vigilo-common vigilo-connector
 Requires:   nagios
+Requires(pre): group(nagios)
 
 
 # Init

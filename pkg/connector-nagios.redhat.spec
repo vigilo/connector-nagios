@@ -23,6 +23,7 @@ BuildRequires:   python26-babel
 Requires:   python26-distribute
 Requires:   vigilo-common vigilo-connector
 Requires:   nagios
+Requires(pre): group(nagios)
 
 
 # Init
