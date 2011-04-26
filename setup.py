@@ -39,6 +39,7 @@ setup(name='vigilo-connector-nagios',
         license='http://www.gnu.org/licenses/gpl-2.0.html',
         long_description="Gateway from Nagios to the Vigilo message "
                          "bus (XMPP) and back to Nagios.",
+        zip_safe=False, # pour pouvoir écrire le dropin.cache de twisted
         install_requires=[
             'setuptools',
             'vigilo-common',
