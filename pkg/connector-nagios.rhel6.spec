@@ -51,7 +51,7 @@ make install_pkg \
 
 %pre
 getent group vigilo-nagios >/dev/null || groupadd -r vigilo-nagios
-getent passwd vigilo-nagios >/dev/null || useradd -r -g vigilo-nagios -G nagios -d %{_localstatedir}/lib/vigilo/%{module} -s /sbin/false vigilo-nagios
+getent passwd vigilo-nagios >/dev/null || useradd -r -g vigilo-nagios -G nagios -d %{_localstatedir}/lib/vigilo/%{module} -s /sbin/nologin vigilo-nagios
 exit 0
 
 %post

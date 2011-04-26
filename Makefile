@@ -29,7 +29,7 @@ install_data: pkg/init pkg/initconf
 install_permissions:
 	@echo "Creating the $(USER) user..."
 	-/usr/sbin/groupadd $(USER)
-	-/usr/sbin/useradd -s /bin/false -M -g $(USER) -G nagios \
+	-/usr/sbin/useradd -s /sbin/nologin -M -g $(USER) -G nagios \
 		-d $(LOCALSTATEDIR)/lib/vigilo/$(NAME) \
 		-c 'Vigilo connector-nagios user' $(USER)
 	chown $(USER):$(USER) \
