@@ -94,11 +94,9 @@ command = /vigilo/command
 accepted_commands = PROCESS_SERVICE_CHECK_RESULT, PROCESS_HOST_CHECK_RESULT, SCHEDULE_HOST_DOWNTIME, SCHEDULE_SVC_DOWNTIME, SCHEDULE_SVC_CHECK, SCHEDULE_HOST_CHECK, SCHEDULE_HOST_SVC_CHECKS, CHANGE_NORMAL_HOST_CHECK_INTERVAL, CHANGE_NORMAL_SVC_CHECK_INTERVAL, SEND_CUSTOM_HOST_NOTIFICATION, SEND_CUSTOM_SVC_NOTIFICATION
 
 # Emplacement du socket utilisé pour recevoir des messages de Nagios.
-# Si absent, il ne sera pas possible de recevoir les notifications de Nagios.
 listen_unix = @LOCALSTATEDIR@/lib/vigilo/connector-nagios/send.sock
 
 # Emplacement du pipe utilisé pour envoyer des commandes à Nagios.
-# Si absent, il ne sera pas possible d'envoyer des commandes à Nagios.
 nagios_pipe = @NAGIOSCMDPIPE@
 
 
