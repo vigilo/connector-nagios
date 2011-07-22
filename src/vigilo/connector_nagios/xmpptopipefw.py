@@ -77,18 +77,19 @@ class XMPPToPipeForwarder(PubSubListener):
 
             cmd_timestamp = float(str(data.timestamp))
             cmd_name = str(data.cmdname)
-            cmd_value = str(data.value)
+            cmd_value = unicode(data.value).encode("utf-8")
 
         elif qualified_name == xml.namespaced_tag(xml.NS_STATE, 'state'):
             cmd_timestamp = float(str(data.timestamp))
             if str(data.service):
                 cmd_name = 'PROCESS_SERVICE_CHECK_RESULT'
-                cmd_value = "%s;%s;%s;%s" % (str(data.host), str(data.service),
-                                             str(data.code), str(data.message))
+                cmd_value = "%s;%s;%s;%s" % (
+                            str(data.host), str(data.service), str(data.code),
+                            unicode(data.message).encode("utf-8"))
             else:
                 cmd_name = 'PROCESS_HOST_CHECK_RESULT'
                 cmd_value = "%s;%s;%s" % (str(data.host), str(data.code),
-                                          str(data.message))
+                                          unicode(data.message).encode("utf-8"))
         else:
             return
 

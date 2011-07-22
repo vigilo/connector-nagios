@@ -60,9 +60,9 @@ class TestForwarder(unittest.TestCase):
         d.addCallback(check_result)
         return d
 
-    def test_convertToNagios(self):
+    def test_convertToNagios_command(self):
         """
-        Un message "command" à destination de Nagios doit être converti dans le bon format
+        Message "command"
         """
         msg = domish.Element((NS_NAGIOS, 'command'))
         msg.addElement('timestamp', content="0")
@@ -72,37 +72,69 @@ class TestForwarder(unittest.TestCase):
         self.assertEqual(result, "[0.0] PROCESS_SERVICE_CHECK_RESULT;test",
                          "La conversion en commande Nagios n'est pas bonne")
 
+    def _make_state_msg(self, service='', code='1', message='Test message'):
         msg = domish.Element((NS_STATE, 'state'))
         msg.addElement('timestamp', content='1239104006')
         msg.addElement('host', content='server.example.com')
         msg.addElement('ip', content='192.168.1.1')
-        msg.addElement('service', content='Load')
-        msg.addElement('code', content='1')
+        msg.addElement('service', content=service)
+        msg.addElement('code', content=str(code))
         msg.addElement('type', content='HARD')
         msg.addElement('attempt', content='2')
-        msg.addElement('message', content='WARNING: Load average is above '
-                                          '4 (4.5)')
+        msg.addElement('message', content=message)
+        return msg
 
+    def test_convertToNagios_state_service(self):
+        """
+        Message "state" sur un service
+        """
+        msg = self._make_state_msg(service='Load', code=1,
+                    message='WARNING: Load average is above 4 (4.5)')
         result = self.fwd.convertXmlToNagios(msg)
         self.assertEqual(result, "[1239104006.0] PROCESS_SERVICE_CHECK_RESULT;"
                 "server.example.com;Load;1;WARNING: Load average is above 4 "
                 "(4.5)", "La conversion en commande Nagios n'est pas bonne")
 
-        msg = domish.Element((NS_STATE, 'state'))
-        msg.addElement('timestamp', content='1239104006')
-        msg.addElement('host', content='server.example.com')
-        msg.addElement('ip', content='192.168.1.1')
-        msg.addElement('service', content='')
-        msg.addElement('code', content='2')
-        msg.addElement('type', content='HARD')
-        msg.addElement('attempt', content='2')
-        msg.addElement('message', content="CRITICAL: Host unreachable "
-                                          "(192.168.1.1)")
-
+    def test_convertToNagios_state_host(self):
+        """
+        Message "state" sur un hôte
+        """
+        msg = self._make_state_msg(code=2,
+                message="CRITICAL: Host unreachable (192.168.1.1)")
         result = self.fwd.convertXmlToNagios(msg)
         self.assertEqual(result, "[1239104006.0] PROCESS_HOST_CHECK_RESULT;"
                 "server.example.com;2;CRITICAL: Host unreachable (192.168.1.1)",
                  "La conversion en commande Nagios n'est pas bonne")
+
+    def test_convertToNagios_state_host_unicode(self):
+        """
+        Message "state" avec caractères accentués
+        """
+        msg = self._make_state_msg(message=u'OK: Décalage 0.0s')
+        result = self.fwd.convertXmlToNagios(msg)
+        self.assertTrue(result.endswith("Décalage 0.0s"),
+                "Les caractères accentués du message posent problème")
+
+    def test_convertToNagios_state_svc_unicode(self):
+        """
+        Message "state" avec caractères accentués
+        """
+        msg = self._make_state_msg(service="NTP", message=u'OK: Décalage 0.0s')
+        result = self.fwd.convertXmlToNagios(msg)
+        self.assertTrue(result.endswith("Décalage 0.0s"),
+                "Les caractères accentués du message posent problème")
+
+    def test_convertToNagios_command_unicode(self):
+        """
+        Message "command" avec caractères accentués
+        """
+        msg = domish.Element((NS_NAGIOS, 'command'))
+        msg.addElement('timestamp', content="0")
+        msg.addElement('cmdname', content="PROCESS_SERVICE_CHECK_RESULT")
+        msg.addElement('value', content=u"test accentué")
+        result = self.fwd.convertXmlToNagios(msg)
+        self.assertTrue(result.endswith("accentué"),
+                "Les caractères accentués du message posent problème")
 
 
 if __name__ == "__main__":
