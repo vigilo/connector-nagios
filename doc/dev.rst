@@ -30,7 +30,7 @@ le format utilisé est très simple ce qui permet par exemple de générer des
 alertes depuis n'importe quel autre programme.
 
 Les messages sont composés de plusieurs champs, séparés par des barres
-verticales (« | », soit la combinaison de touches AltGr+6).
+verticales (« \| », soit la combinaison de touches AltGr+6).
 
 Messages de changement d'état
 -----------------------------
@@ -80,7 +80,7 @@ DOWN (hôte) / CRITICAL (service)
 Le sixième champ contient un message décrivant la raison du changement d'état.
 Le message ne doit contenir que des caractères imprimables (en particulier, il
 ne doit pas contenir de retour à la ligne) et ne peut pas contenir le caractère
-utilisé comme séparateur de champs (« | »).
+utilisé comme séparateur de champs (« \| »).
 
 Exemple d'un changement d'état indiquant un retour à la normale du la charge
 sur 5 minutes (service « Load 05 ») sur le serveur « host1.example.com »::
@@ -140,13 +140,13 @@ l'état de l'hôte « host1.example.com »::
 
     echo "event|`date +%s`|host1.example.com||DOWN|DOWN: Machine indisponible" | socat - UNIX-CONNECT:/var/ib/vigilo/connector-nagios/send.sock
 
-Notez l'utilisation d'une pipe UNIX (« | ») pour passer le message formaté par
+Notez l'utilisation d'une pipe UNIX (« \| ») pour passer le message formaté par
 la commande « echo » à la commande « socat ».
 
-La commande « date » est exécuté grâce à des apostrophes inversées (« ` ») afin
+La commande « date » est exécuté grâce à des apostrophes inversées (« \` ») afin
 de récupérer un horodatage dans le format attendu.
 
-Le socket UNIX « /var/ib/vigilo/connector-nagios/send.sock » est passé en
+Le socket UNIX « /var/lib/vigilo/connector-nagios/send.sock » est passé en
 argument à la méthode « UNIX-CONNECT » de socat. Cette valeur correspond à
 l'option « listen_unix » de la configuration du connector-nagios. Elle doit
 être adaptée en fonction de votre installation.

@@ -103,7 +103,7 @@ loggers, handlers, formatters, logger_*, handler_*, formatter_*
     Contient la configuration du mécanisme de journalisation des événements
     (voir chapitre :ref:`logging`).
 
-    « * » correspond au nom d'un logger/handler/formatter défini dans la
+    « \* » correspond au nom d'un logger/handler/formatter défini dans la
     section loggers, handlers ou formatters (respectivement).
 
 
