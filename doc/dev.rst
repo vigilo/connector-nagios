@@ -138,7 +138,8 @@ sur le format des différents messages acceptés par le connecteur (voir chapitr
 Exemple d'utilisation de la commande « socat » pour envoyer une alerte sur
 l'état de l'hôte « host1.example.com »::
 
-    echo "event|`date +%s`|host1.example.com||DOWN|DOWN: Machine indisponible" | socat - UNIX-CONNECT:/var/ib/vigilo/connector-nagios/send.sock
+    echo "event|`date +%s`|host1.example.com||DOWN|DOWN: indisponible" \
+        | socat - UNIX-CONNECT:/var/ib/vigilo/connector-nagios/send.sock
 
 Notez l'utilisation d'une pipe UNIX (« \| ») pour passer le message formaté par
 la commande « echo » à la commande « socat ».
