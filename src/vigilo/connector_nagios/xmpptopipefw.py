@@ -121,9 +121,11 @@ class XMPPToPipeForwarder(PubSubListener):
             'msg': msg,
         })
         # cannot open in append mode, since that causes a seek
-        pipe = os.open(self.pipe_filename, os.O_WRONLY)
-        fcntl.flock(pipe, fcntl.LOCK_EX)
-        os.write(pipe, msg + '\n')
-        fcntl.flock(pipe, fcntl.LOCK_UN)
-        os.close(pipe)
+        pipe = open(self.pipe_filename, "w")
+        fcntl.flock(pipe.fileno(), fcntl.LOCK_EX)
+        try:
+            pipe.write(msg + '\n')
+        finally:
+            fcntl.flock(pipe.fileno(), fcntl.LOCK_UN)
+            pipe.close()
 
