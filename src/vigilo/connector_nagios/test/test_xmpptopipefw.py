@@ -136,6 +136,3 @@ class TestForwarder(unittest.TestCase):
         self.assertTrue(result.endswith("accentué"),
                 "Les caractères accentués du message posent problème")
 
-
-if __name__ == "__main__":
-    unittest.main()
