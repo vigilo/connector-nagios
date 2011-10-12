@@ -39,7 +39,7 @@ class NagiosConnectorServiceMaker(object):
         LOGGER = get_logger('vigilo.connector_nagios')
 
         from vigilo.connector_nagios.xmpptopipefw import XMPPToPipeForwarder
-        from vigilo.connector.sockettonodefw import SocketToNodeForwarder
+        from vigilo.connector_nagios.nagiossender import NagiosSender
 
         xmpp_client = client.client_factory(settings)
 
@@ -77,7 +77,7 @@ class NagiosConnectorServiceMaker(object):
                     {'dir': os.path.dirname(sr)}
             LOGGER.error(msg)
             raise OSError(msg)
-        message_publisher = SocketToNodeForwarder(
+        message_publisher = NagiosSender(
                 sr, bkpfile,
                 settings['connector']['backup_table_to_bus'])
         message_publisher.setHandlerParent(xmpp_client)
@@ -97,6 +97,8 @@ class NagiosConnectorServiceMaker(object):
                 bkpfile,
                 settings['connector']['backup_table_from_bus'])
         message_consumer.setHandlerParent(xmpp_client)
+        # pour les stats: la file d'attente est celle du consommateur
+        message_publisher.queue_source = message_consumer
 
         # Présence
         from vigilo.connector.presence import PresenceManager
