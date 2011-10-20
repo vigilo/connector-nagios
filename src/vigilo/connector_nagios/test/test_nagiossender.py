@@ -31,11 +31,14 @@ class NagiosSenderTestCase(unittest.TestCase):
         """La stat de file d'attente doit venir de queue_source"""
         ff = FakeForwarder()
         ff.queue = range(42)
-        self.ns.queue_source = ff
+        self.ns.from_bus = ff
         d = self.ns.getStats()
         def check(stats):
             print stats
-            self.assertEqual(stats["queue"], 42)
+            self.assertTrue("queue-from-bus" in stats)
+            self.assertTrue("queue-from-nagios" in stats)
+            self.assertFalse("queue" in stats)
+            self.assertEqual(stats["queue-from-bus"], 42)
         d.addCallback(check)
         return d
 

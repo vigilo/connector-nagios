@@ -97,8 +97,8 @@ class NagiosConnectorServiceMaker(object):
                 bkpfile,
                 settings['connector']['backup_table_from_bus'])
         message_consumer.setHandlerParent(xmpp_client)
-        # pour les stats: la file d'attente est celle du consommateur
-        message_publisher.queue_source = message_consumer
+        # pour les stats: gestion de la file d'attente du consommateur
+        message_publisher.from_bus = message_consumer
 
         # Présence
         from vigilo.connector.presence import PresenceManager

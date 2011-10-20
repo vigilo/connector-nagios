@@ -34,13 +34,15 @@ class NagiosSender(SocketToNodeForwarder):
 
     def __init__(self, *args, **kwargs):
         super(NagiosSender, self).__init__(*args, **kwargs)
-        self.queue_source = None
+        self.from_bus = None
 
     def getStats(self):
         d = super(NagiosSender, self).getStats()
-        def replace_queue(stats):
-            if self.queue_source is not None:
-                stats["queue"] = len(self.queue_source.queue)
+        def split_queues(stats):
+            if self.from_bus is not None:
+                stats["queue-from-nagios"] = stats["queue"]
+                del stats["queue"]
+                stats["queue-from-bus"] = len(self.from_bus.queue)
             return stats
-        d.addCallback(replace_queue)
+        d.addCallback(split_queues)
         return d
