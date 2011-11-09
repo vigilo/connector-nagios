@@ -105,7 +105,7 @@ nagios_pipe = @NAGIOSCMDPIPE@
 keys = root,twisted
 
 [handlers]
-keys = syslog,console
+keys = syslog,console,errors
 
 [formatters]
 keys = consoleFormatter,syslogFormatter
@@ -122,15 +122,21 @@ handlers = syslog,console
 
 [handler_console]
 class = StreamHandler
-level = DEBUG
+level = NOTSET
 formatter = consoleFormatter
 args = (sys.stdout,)
 
 [handler_syslog]
 class = handlers.SysLogHandler
-level = DEBUG
+level = NOTSET
 formatter = syslogFormatter
 args = '/dev/log', 'daemon'
+
+[handler_errors]
+level = ERROR
+class = handlers.RotatingFileHandler
+args = ('@LOCALSTATEDIR@/log/vigilo/connector-nagios/error.log', 'a', 1024*1024*10, 5)
+formatter = consoleFormatter
 
 [formatter_consoleFormatter]
 format = [%(created)f] %(levelname)s::%(name)s::%(message)s

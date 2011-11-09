@@ -93,6 +93,8 @@ rm -rf $RPM_BUILD_ROOT
 %{python26_sitelib}/twisted*
 %dir %{_localstatedir}/lib/vigilo
 %attr(-,vigilo-nagios,vigilo-nagios) %{_localstatedir}/lib/vigilo/%{module}
+%dir %{_localstatedir}/log/vigilo
+%attr(-,vigilo-nagios,vigilo-nagios) %{_localstatedir}/log/vigilo/%{module}
 %attr(-,vigilo-nagios,vigilo-nagios) %{_localstatedir}/run/%{name}
 
 

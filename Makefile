@@ -31,9 +31,10 @@ install_permissions:
 	-/usr/sbin/groupadd $(USER)
 	-/usr/sbin/useradd -s /sbin/nologin -M -g $(USER) -G nagios \
 		-d $(LOCALSTATEDIR)/lib/vigilo/$(NAME) \
-		-c 'Vigilo connector-nagios user' $(USER)
+		-c 'Vigilo $(NAME) user' $(USER)
 	chown $(USER):$(USER) \
 			$(DESTDIR)$(LOCALSTATEDIR)/lib/vigilo/$(NAME) \
+			$(DESTDIR)$(LOCALSTATEDIR)/log/vigilo/$(NAME) \
 			$(DESTDIR)$(LOCALSTATEDIR)/run/$(PKGNAME)
 	chown root:$(USER) $(DESTDIR)$(SYSCONFDIR)/vigilo/$(NAME)/settings.ini
 	chmod 640 $(DESTDIR)$(SYSCONFDIR)/vigilo/$(NAME)/settings.ini
