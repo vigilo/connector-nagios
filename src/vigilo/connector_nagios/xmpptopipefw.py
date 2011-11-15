@@ -10,7 +10,11 @@ from __future__ import absolute_import
 import os
 import stat
 import fcntl
-from twisted.internet import threads
+import tempfile
+import time
+import stat
+
+from twisted.internet import threads, defer
 from twisted.words.xish import domish
 from vigilo.pubsub import xml
 
@@ -51,19 +55,71 @@ class XMPPToPipeForwarder(PubSubListener):
         super(XMPPToPipeForwarder, self).__init__(dbfilename, dbtable)
         self.pipe_filename = pipe_filename
         self.max_send_simult = 1
+        self.msg_group_size = 50
+        self._nagios_group = None
 
     def isConnected(self):
         return (os.path.exists(self.pipe_filename) and
                 stat.S_ISFIFO(os.stat(self.pipe_filename).st_mode))
 
-    def processMessage(self, msg):
-        if isinstance(msg, domish.Element):
-            msg = self.convertXmlToNagios(msg)
+    @defer.inlineCallbacks
+    def _processQueue(self):
+        """
+        Boucle principale de dépilement. Différence par rapport à la classe
+        parente : si on peut on récupère les messages par blocs de
+        L{msg_group_size}.
+        """
+        while self.isConnected():
+            msg_group = []
+            for i in range(self.msg_group_size):
+                msg = yield self._get_next_msg()
+                if msg is None:
+                    break # rien à faire
+                msg_group.append(msg)
+            if not msg_group:
+                break
+            self._messages_forwarded += 1
+            result = self.processMessage(msg_group)
+            if result is None:
+                continue
+            yield result
+
+    def processMessage(self, msg_group):
+        msg = self.convertGroupToNagios(msg_group)
         if msg is None:
             return None
         d = threads.deferToThread(self.writeToNagios, msg)
-        d.addErrback(self._send_failed, msg)
         return d
+
+    def convertGroupToNagios(self, msg_group):
+        if len(msg_group) == 0:
+            return
+        elif len(msg_group) == 1:
+            return self.convertXmlToNagios(msg_group[0])
+        else:
+            commands = []
+            for msg in msg_group:
+                cmd = self.convertXmlToNagios(msg)
+                if cmd is not None:
+                    commands.append(cmd)
+            if not commands:
+                return
+            if self._nagios_group is None:
+                self._nagios_group = os.stat(self.pipe_filename).st_gid
+            tmpdir = "/dev/shm/vigilo-connector-nagios"
+            if not os.path.exists(tmpdir):
+                os.mkdir(tmpdir)
+                os.chown(tmpdir, -1, self._nagios_group)
+                os.chmod(tmpdir, stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR |
+                                 stat.S_IRGRP | stat.S_IWGRP | stat.S_IXGRP |
+                                 stat.S_IROTH | stat.S_IXOTH) # 775
+            tmpfile, tmpfilename = tempfile.mkstemp(dir=tmpdir)
+            os.write(tmpfile, "\n".join(commands))
+            os.close(tmpfile)
+            os.chown(tmpfilename, -1, self._nagios_group)
+            os.chmod(tmpfilename, stat.S_IRUSR | stat.S_IWUSR | stat.S_IRGRP)
+            msg = "[%d] PROCESS_FILE;%s;1" % (int(time.time()), tmpfilename)
+            return msg
 
     def convertXmlToNagios(self, data):
         """

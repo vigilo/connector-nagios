@@ -48,7 +48,7 @@ class TestForwarder(unittest.TestCase):
         # Désactivation de la vérification du FIFO
         setattr(self.fwd, "isConnected", lambda: True)
         # Envoi du message
-        d = self.fwd.processMessage(msg)
+        d = self.fwd.processMessage([msg])
         def check_result(r):
             self.failUnless(os.path.exists(self.pipe),
                             "Rien n'a été écrit dans le pipe")
