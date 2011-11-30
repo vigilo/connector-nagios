@@ -15,17 +15,19 @@ import time
 import stat
 
 from twisted.internet import threads, defer
-from twisted.words.xish import domish
-from vigilo.pubsub import xml
+#from twisted.words.xish import domish
+#from vigilo.pubsub import xml
 
 from vigilo.common.conf import settings
 
+from vigilo.connector.client import MessageHandler
+
 from vigilo.common.logging import get_logger
-from vigilo.connector.forwarder import PubSubListener
 LOGGER = get_logger(__name__)
 
 from vigilo.common.gettext import translate
 _ = translate(__name__)
+
 
 
 class WrongNagiosPipe(Exception):
@@ -33,73 +35,61 @@ class WrongNagiosPipe(Exception):
         return _('the configured nagios command pipe is not a FIFO')
 
 
-class XMPPToPipeForwarder(PubSubListener):
+
+class NagiosCommandHandler(MessageHandler):
     """
-    Receives messages from xmpp, and passes them to the pipe.
-    Forward XMPP to pipe.
+    Transfère les messages pour Nagios du bus à son I{pipe} de commandes
+    externes.
     """
 
-    def __init__(self, pipe_filename, dbfilename, dbtable):
+
+    def __init__(self, pipe_filename, accepted_commands):
         """
         Instancie un connecteur XMPP vers pipe.
 
-        @param pipe_filename: le nom du fichier pipe qui accueillra les
-        messages XMPP
-        @type pipe_filename: C{str}
-        @param dbfilename: le nom du fichier permettant la sauvegarde des
-        messages en cas de problème d'éciture sur le pipe
-        @type dbfilename: C{str}
-        @param dbtable: Le nom de la table SQL dans ce fichier.
-        @type dbtable: C{str}
+        @param pipe_filename: le nom du fichier pipe de Nagios
+        @type  pipe_filename: C{str}
         """
-        super(XMPPToPipeForwarder, self).__init__(dbfilename, dbtable)
+        super(NagiosCommandHandler, self).__init__()
         self.pipe_filename = pipe_filename
-        self.max_send_simult = 1
+        self.accepted_commands = accepted_commands
         self.msg_group_size = 50
+        self._msg_group = []
         self._nagios_group = None
+
 
     def isConnected(self):
         return (os.path.exists(self.pipe_filename) and
                 stat.S_ISFIFO(os.stat(self.pipe_filename).st_mode))
 
-    @defer.inlineCallbacks
-    def _processQueue(self):
-        """
-        Boucle principale de dépilement. Différence par rapport à la classe
-        parente : si on peut on récupère les messages par blocs de
-        L{msg_group_size}.
-        """
-        while self.isConnected():
-            msg_group = []
-            for i in range(self.msg_group_size):
-                msg = yield self._get_next_msg()
-                if msg is None:
-                    break # rien à faire
-                msg_group.append(msg)
-            if not msg_group:
-                break
-            self._messages_forwarded += 1
-            result = self.processMessage(msg_group)
-            if result is None:
-                continue
-            yield result
 
-    def processMessage(self, msg_group):
-        msg = self.convertGroupToNagios(msg_group)
+    def processMessage(self, msg):
+        self._msg_group.append(msg)
+        if len(self._msg_group) > self.msg_group_size:
+            return self.flushGroup()
+        else:
+            return defer.succeed(None)
+
+
+    def flushGroup(self):
+        msg = self.convertGroupToNagios()
         if msg is None:
             return None
         d = threads.deferToThread(self.writeToNagios, msg)
         return d
 
-    def convertGroupToNagios(self, msg_group):
-        if len(msg_group) == 0:
+
+    def convertGroupToNagios(self):
+        if len(self._msg_group) == 0:
             return
-        elif len(msg_group) == 1:
-            return self.convertXmlToNagios(msg_group[0])
+        elif len(self._msg_group) == 1:
+            # Envoi direct, pas de fichier temporaire
+            return self.convertToNagios(self._msg_group[0])
         else:
             commands = []
-            for msg in msg_group:
-                cmd = self.convertXmlToNagios(msg)
+            while self._msg_group:
+                msg = self._msg_group.pop(0)
+                cmd = self.convertToNagios(msg)
                 if cmd is not None:
                     commands.append(cmd)
             if not commands:
@@ -121,41 +111,33 @@ class XMPPToPipeForwarder(PubSubListener):
             msg = "[%d] PROCESS_FILE;%s;1" % (int(time.time()), tmpfilename)
             return msg
 
-    def convertXmlToNagios(self, data):
+    def convertToNagios(self, data):
         """
-        Convertisseur entre un message de commande Nagios en XML et le format
-        attendu par Nagios
+        Convertisseur entre un message de commande Nagios venant du bus et le
+        format attendu par Nagios
         """
-        qualified_name = xml.namespaced_tag(data.uri, data.name)
+        cmd_timestamp = float(data["timestamp"])
+        if data["type"] == "nagios" or data["type"] == "command":
+            cmd_name = data["cmdname"]
+            cmd_value = unicode(data["value"]).encode("utf-8")
 
-        if qualified_name in [xml.namespaced_tag(xml.NS_NAGIOS, 'command'),
-                              xml.namespaced_tag(xml.NS_COMMAND, 'command')]:
-
-            cmd_timestamp = float(str(data.timestamp))
-            cmd_name = str(data.cmdname)
-            cmd_value = unicode(data.value).encode("utf-8")
-
-        elif qualified_name == xml.namespaced_tag(xml.NS_STATE, 'state'):
-            cmd_timestamp = float(str(data.timestamp))
-            if data.service is not None and str(data.service):
+        elif data["type"] == "state":
+            if "service" in data and data["service"]:
                 cmd_name = 'PROCESS_SERVICE_CHECK_RESULT'
-                cmd_value = "%s;%s;%s;%s" % (
-                            str(data.host), str(data.service), str(data.code),
-                            unicode(data.message).encode("utf-8"))
+                cmd_value = u"%(host)s;%(service)s;%(code)s;%(message)s" % data
             else:
                 cmd_name = 'PROCESS_HOST_CHECK_RESULT'
-                cmd_value = "%s;%s;%s" % (str(data.host), str(data.code),
-                                          unicode(data.message).encode("utf-8"))
+                cmd_value = u"%(host)s;%(code)s;%(message)s" % data
+            cmd_value = cmd_value.encode("utf-8")
         else:
             return
 
-        LOGGER.debug('Command message to forward: %s', data.toXml())
-        if cmd_name not in settings['connector-nagios']['accepted_commands']:
+        LOGGER.debug('Command message to forward: %s', data)
+        if cmd_name not in self.accepted_commands:
             LOGGER.error(_("Command '%(received)s' disallowed by "
                            "policy, accepted commands: %(accepted)r") % {
                             'received': data.cmdname,
-                            'accepted': settings['connector-nagios']
-                                                ['accepted_commands'],
+                            'accepted': self.accepted_commands,
                          })
             return
         return "[%s] %s;%s" % (cmd_timestamp, cmd_name, cmd_value)
@@ -185,3 +167,15 @@ class XMPPToPipeForwarder(PubSubListener):
             fcntl.flock(pipe.fileno(), fcntl.LOCK_UN)
             pipe.close()
 
+
+def nagioscommandhandler_factory(settings, client):
+    try:
+        commands = settings['connector-nagios'].as_list('accepted_commands')
+    except KeyError:
+        commands = []
+    pipe = settings['connector-nagios']['nagios_pipe']
+    queue = settings["connector"]["queue"]
+    nch = NagiosCommandHandler(pipe, commands)
+    nch.setClient(client)
+    nch.subscribe(queue)
+    return nch
