@@ -30,10 +30,12 @@ def makeService(options):
     from vigilo.connector.status import statuspublisher_factory
     #from vigilo.connector_nagios.xmpptopipefw import XMPPToPipeForwarder
     #from vigilo.connector_nagios.nagiossender import NagiosSender
+    from vigilo.connector_nagios.nagioscommand import nagioscmdh_factory
 
     try:
-        pw = settings['connector-nagios']['nagios_pipe']
         socket_filename = settings['connector-nagios']['listen_unix']
+        settings['connector-nagios']['nagios_pipe']
+        settings["bus"]["queue"]
     except KeyError, e:
         LOGGER.error(_("Missing configuration option: %s"), str(e))
         sys.exit(1)
@@ -51,6 +53,9 @@ def makeService(options):
     backup_provider.setServiceParent(root_service)
 
     bus_publisher.registerProducer(backup_provider, True)
+
+    # Du bus vers Nagios
+    ncmdh = nagioscmdh_factory(settings, client)
 
     # Statistiques
     servicename = options["name"]

@@ -168,13 +168,13 @@ class NagiosCommandHandler(MessageHandler):
             pipe.close()
 
 
-def nagioscommandhandler_factory(settings, client):
+def nagioscmdh_factory(settings, client):
     try:
         commands = settings['connector-nagios'].as_list('accepted_commands')
     except KeyError:
         commands = []
     pipe = settings['connector-nagios']['nagios_pipe']
-    queue = settings["connector"]["queue"]
+    queue = settings["bus"]["queue"]
     nch = NagiosCommandHandler(pipe, commands)
     nch.setClient(client)
     nch.subscribe(queue)
