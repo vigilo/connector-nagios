@@ -137,7 +137,7 @@ class XMPPToPipeForwarder(PubSubListener):
 
         elif qualified_name == xml.namespaced_tag(xml.NS_STATE, 'state'):
             cmd_timestamp = float(str(data.timestamp))
-            if str(data.service):
+            if data.service is not None and str(data.service):
                 cmd_name = 'PROCESS_SERVICE_CHECK_RESULT'
                 cmd_value = "%s;%s;%s;%s" % (
                             str(data.host), str(data.service), str(data.code),

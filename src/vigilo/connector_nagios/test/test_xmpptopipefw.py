@@ -72,12 +72,13 @@ class TestForwarder(unittest.TestCase):
         self.assertEqual(result, "[0.0] PROCESS_SERVICE_CHECK_RESULT;test",
                          "La conversion en commande Nagios n'est pas bonne")
 
-    def _make_state_msg(self, service='', code='1', message='Test message'):
+    def _make_state_msg(self, service=None, code='1', message='Test message'):
         msg = domish.Element((NS_STATE, 'state'))
         msg.addElement('timestamp', content='1239104006')
         msg.addElement('host', content='server.example.com')
         msg.addElement('ip', content='192.168.1.1')
-        msg.addElement('service', content=service)
+        if service is not None:
+            msg.addElement('service', content=service)
         msg.addElement('code', content=str(code))
         msg.addElement('type', content='HARD')
         msg.addElement('attempt', content='2')
