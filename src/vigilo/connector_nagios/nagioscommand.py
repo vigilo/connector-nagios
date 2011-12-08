@@ -18,8 +18,6 @@ from twisted.internet import threads, defer
 #from twisted.words.xish import domish
 #from vigilo.pubsub import xml
 
-from vigilo.common.conf import settings
-
 from vigilo.connector.client import MessageHandler
 
 from vigilo.common.logging import get_logger

@@ -2,7 +2,7 @@
 # Copyright (C) 2006-2011 CS-SI
 # License: GNU GPL v2 <http://www.gnu.org/licenses/gpl-2.0.html>
 
-"""Nagios <-> XMPP connector"""
+"""Nagios <-> Bus connector"""
 
 
 from __future__ import absolute_import
@@ -28,8 +28,6 @@ def makeService(options):
     from vigilo.connector.forwarder import backupprovider_factory
     from vigilo.connector.socket import socketlistener_factory
     from vigilo.connector.status import statuspublisher_factory
-    #from vigilo.connector_nagios.xmpptopipefw import XMPPToPipeForwarder
-    #from vigilo.connector_nagios.nagiossender import NagiosSender
     from vigilo.connector_nagios.nagioscommand import nagioscmdh_factory
 
     try:
