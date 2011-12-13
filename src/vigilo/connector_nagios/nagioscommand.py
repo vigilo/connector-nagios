@@ -15,10 +15,8 @@ import time
 import stat
 
 from twisted.internet import threads, defer
-#from twisted.words.xish import domish
-#from vigilo.pubsub import xml
 
-from vigilo.connector.client import MessageHandler
+from vigilo.connector.handlers import MessageHandler
 
 from vigilo.common.logging import get_logger
 LOGGER = get_logger(__name__)
@@ -41,7 +39,7 @@ class NagiosCommandHandler(MessageHandler):
     """
 
 
-    def __init__(self, pipe_filename, accepted_commands):
+    def __init__(self, pipe_filename, accepted_commands, group_size):
         """
         Instancie un connecteur XMPP vers pipe.
 
@@ -51,7 +49,7 @@ class NagiosCommandHandler(MessageHandler):
         super(NagiosCommandHandler, self).__init__()
         self.pipe_filename = pipe_filename
         self.accepted_commands = accepted_commands
-        self.msg_group_size = 50
+        self.msg_group_size = group_size
         self._msg_group = []
         self._nagios_group = None
 
@@ -134,7 +132,7 @@ class NagiosCommandHandler(MessageHandler):
         if cmd_name not in self.accepted_commands:
             LOGGER.error(_("Command '%(received)s' disallowed by "
                            "policy, accepted commands: %(accepted)r") % {
-                            'received': data.cmdname,
+                            'received': cmd_name,
                             'accepted': self.accepted_commands,
                          })
             return
@@ -173,7 +171,11 @@ def nagioscmdh_factory(settings, client):
         commands = []
     pipe = settings['connector-nagios']['nagios_pipe']
     queue = settings["bus"]["queue"]
-    nch = NagiosCommandHandler(pipe, commands)
+    try:
+        group_size = settings['connector-nagios'].as_int('group_size')
+    except KeyError:
+        group_size = 50
+    nch = NagiosCommandHandler(pipe, commands, group_size)
     nch.setClient(client)
     nch.subscribe(queue)
     return nch
