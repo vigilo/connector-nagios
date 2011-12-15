@@ -24,8 +24,8 @@ def makeService(options):
     _ = translate(__name__)
 
     from vigilo.connector.client import client_factory
-    from vigilo.connector.forwarder import buspublisher_factory
-    from vigilo.connector.forwarder import backupprovider_factory
+    from vigilo.connector.handlers import buspublisher_factory
+    from vigilo.connector.handlers import backupprovider_factory
     from vigilo.connector.socket import socketlistener_factory
     from vigilo.connector.status import statuspublisher_factory
     from vigilo.connector_nagios.nagioscommand import nagioscmdh_factory
