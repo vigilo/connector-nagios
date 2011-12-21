@@ -19,13 +19,10 @@ from mock import Mock
 from txamqp.message import Message
 from txamqp.content import Content
 
-#from twisted.words.xish import domish
-
 from vigilo.common.conf import settings
 settings.load_module(__name__)
 
 from vigilo.connector_nagios.nagioscommand import NagiosCommandHandler
-#from vigilo.pubsub.xml import NS_NAGIOS, NS_STATE
 from vigilo.connector.test.helpers import json
 
 
