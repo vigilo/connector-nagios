@@ -62,22 +62,4 @@ def makeService(options):
     status_publisher = statuspublisher_factory(settings, servicename, client,
             providers=[bus_publisher, backup_provider])
 
-    ## Du bus vers Nagios
-    #if os.path.exists(pw) and not os.access(pw, os.W_OK):
-    #    msg = _("Can't write to the Nagios command pipe: '%s'") % pw
-    #    LOGGER.error(msg)
-    #    raise OSError(msg)
-    #if not os.access(os.path.dirname(pw), os.X_OK):
-    #    msg = _("Can't traverse directory: '%(dir)s'") % \
-    #            {'dir': os.path.dirname(pw)}
-    #    LOGGER.error(msg)
-    #    raise OSError(msg)
-    #message_consumer = XMPPToPipeForwarder(
-    #        pw,
-    #        bkpfile,
-    #        settings['connector']['backup_table_from_bus'])
-    #message_consumer.setHandlerParent(xmpp_client)
-    ## pour les stats: gestion de la file d'attente du consommateur
-    #message_publisher.from_bus = message_consumer
-
     return root_service
