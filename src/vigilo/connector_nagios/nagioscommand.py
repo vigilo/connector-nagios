@@ -16,6 +16,7 @@ import stat
 
 from twisted.internet import threads, defer
 
+from vigilo.connector.options import parseSubscriptions
 from vigilo.connector.handlers import MessageHandler
 
 from vigilo.common.logging import get_logger
@@ -177,5 +178,6 @@ def nagioscmdh_factory(settings, client):
         group_size = 50
     nch = NagiosCommandHandler(pipe, commands, group_size)
     nch.setClient(client)
-    nch.subscribe(queue)
+    subs = parseSubscriptions(settings)
+    nch.subscribe(queue, subs)
     return nch
