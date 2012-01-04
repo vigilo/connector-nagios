@@ -1,90 +1,35 @@
 [bus]
-# Nom ou adresse IP du serveur XMPP à utiliser.
+# Nom ou adresse IP du serveur AMQP à utiliser.
 host = localhost
 
-# Nom du service de publication pour les messages.
-service = pubsub.localhost
-
 # Nom d'utilisateur à utiliser pour se connecter au bus.
-jid = connector-nagios@localhost
+user = connector-nagios
 
-# Mot de passe associé au JID donné.
+# Mot de passe à utiliser
 password = connector-nagios
 
-# Priorité statique. Si cette valeur n'est pas renseignée, la priorité est
-# automatiquement choisie en fonction du nombre de connecteurs utilisant le
-# même compte sur le bus.
-#priority = 1
+# Chiffrement du flux par SSL
+use_ssl = False
 
-# Si require_* à True, le chiffrement de la connexion sera privilégié.
-# Indique s'il faut chiffrer la connexion (True).
-require_tls = False
+# Nom de la file d'attente du connecteur
+queue = connector-nagios-localhost
 
-# Indique s'il faut compresser le flux (True)
-require_compression = False
-
-# Liste des noms des topics auxquels le connecteur est abonné,
-# séparés par des virgules.
+# Liste des abonnements du connecteur, séparés par des virgules.
 # Si la liste est vide, mettre uniquement une virgule.
-subscriptions = /vigilo/command
+subscriptions = nagios:all
 
-# Le trafic lié au bus XMPP doit-il être enregistré dans les logs ?
+# Le trafic lié au bus doit-il être enregistré dans les logs ?
 log_traffic = False
 
 #-----------------------------------------
 # Réglages pour un grand volume de données
 
-# Nombre maximal de message simultanés. Dans eJabberd, cela doit correspondre
-# au paramètre "max_fsm_queue" du fichier ejabberd.cfg
-max_send_simult = 1000
-
-# Nombre de messages de performance à envoyer dans un même message XMPP.
+# Nombre de messages de performance à envoyer dans un même message.
 #  * avantage : augmente très largement le débit maximum
 #  * inconvénient : si les messages de performance ne sont pas générés assez
 #    vite, leur relai peut être retardé (on attend que le paquet soit plein)
-# Le nombre de messages de performance à stocker dans le même message XMPP ne
-# doit pas dépasser la taille limite autorisée par le bus (dans eJabberd, voir
-# l'option "max_stanza_size", par défaut à 64K, ce qui nous limite à environ
-# 250. Testé à 10, 100 et 250, la valeur optimale dépendant de la taille
-# moyenne des messages de performance et de la fréquence des messages.
 # La valeur 0 ou 1 désactive cet envoi par paquets.
 batch_send_perf = 1
-
-
-[connector]
-# Emplacement du fichier de sauvegarde local en cas de pannes.
-backup_file = @LOCALSTATEDIR@/lib/vigilo/connector-nagios/backup.sqlite
-
-# Nom de la table qui stocke les messages en attente à destination du bus.
-backup_table_to_bus = tobus
-
-# Nom de la table qui stocke les messages en attente en provenance du bus.
-backup_table_from_bus = frombus
-
-# Nom d'hôte utilisé pour signaler à Vigilo que ce connecteur fonctionne
-# correctement. Cela doit correspondre au nom d'hôte configuré dans VigiConf
-# pour cette machine. Par défaut, on utilise le nom d'hôte court (sans le
-# domaine DNS)
-#hostname = hostname
-
-# Le noeud de publication à utiliser pour les messages d'état du connecteur.
-# Par défaut, les noeuds définis dans la section [publications] sont utilisés.
-#status_node = /vigilo/connectors-status
-
-# La taille maximum de la file d'attente mémoire, à partir de laquelle
-# le jettera les plus vieux messages.
-# Une limite à 50000 correspond à environ 1Go de RAM utilisé.
-# La valeur par défaut est 0, ce qui désactive cette vérification.
-#max_queue_size = 0
-
-
-[publications]
-# Noms des messages XML traités avec pour chaque type de message
-# le nom du nœud XMPP sur lesquel les messages de ce type sont envoyés.
-perf = /vigilo/perf
-state = /vigilo/state
-event = /vigilo/event
-command = /vigilo/command
 
 
 [connector-nagios]
@@ -100,6 +45,36 @@ listen_unix = @LOCALSTATEDIR@/lib/vigilo/connector-nagios/send.sock
 nagios_pipe = @NAGIOSCMDPIPE@
 
 
+[connector]
+# Emplacement du fichier de sauvegarde local en cas de pannes.
+backup_file = @LOCALSTATEDIR@/lib/vigilo/connector-nagios/backup.sqlite
+
+# Nom de la table qui stocke les messages en attente à destination du bus.
+backup_table = tobus
+
+# Nom d'hôte utilisé pour signaler à Vigilo que ce connecteur fonctionne
+# correctement. Cela doit correspondre au nom d'hôte configuré dans VigiConf
+# pour cette machine. Par défaut, on utilise le nom d'hôte court (sans le
+# domaine DNS)
+#hostname = hostname
+
+# L'exchange à utiliser pour les messages d'état du connecteur.
+# Par défaut, la section [publications] est utilisée.
+#status_exchange = connectors-status
+
+
+[publications]
+# Types de messages et le nom de l'exchange à utiliser pour leur publication.
+# Par défaut, un exchange du même nom que le type est utilisé.
+#perf = perf
+#state = state
+#event = event
+#nagios = nagios
+
+
+# -------
+# Logging
+#
 
 [loggers]
 keys = root,twisted
