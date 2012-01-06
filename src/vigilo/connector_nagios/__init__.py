@@ -27,7 +27,6 @@ def makeService(options):
     from vigilo.connector.handlers import buspublisher_factory
     from vigilo.connector.handlers import backupprovider_factory
     from vigilo.connector.socket import socketlistener_factory
-    from vigilo.connector.status import statuspublisher_factory
     from vigilo.connector_nagios.nagioscommand import nagioscmdh_factory
 
     try:
@@ -56,10 +55,8 @@ def makeService(options):
     ncmdh = nagioscmdh_factory(settings, client)
 
     # Statistiques
-    servicename = options["name"]
-    if servicename is None:
-        servicename = "vigilo-connector-nagios"
-    status_publisher = statuspublisher_factory(settings, servicename, client,
+    from vigilo.connector.status import statuspublisher_factory
+    status_publisher = statuspublisher_factory(settings, client,
             providers=[bus_publisher, backup_provider])
 
     return root_service
