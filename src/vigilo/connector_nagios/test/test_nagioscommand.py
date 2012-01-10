@@ -16,6 +16,7 @@ import unittest
 from nose.twistedtools import reactor, deferred
 
 from mock import Mock
+from twisted.internet import defer
 from txamqp.message import Message
 from txamqp.content import Content
 
@@ -37,7 +38,9 @@ class NagiosCommandTestCase(unittest.TestCase):
         open(self.pipe, "w").close() # on crée le fichier
         #os.mkfifo(self.pipe)
         accepted = ["PROCESS_SERVICE_CHECK_RESULT", "PROCESS_HOST_CHECK_RESULT"]
-        self.nch = NagiosCommandHandler(self.pipe, accepted, 0)
+        self.confdb = Mock()
+        self.confdb.is_local.side_effect = lambda x: defer.succeed(True)
+        self.nch = NagiosCommandHandler(self.pipe, accepted, 0, self.confdb)
         self.nch.registerProducer(Mock(), True)
 
     def tearDown(self):
@@ -151,4 +154,45 @@ class NagiosCommandTestCase(unittest.TestCase):
         result = self.nch.convertToNagios(msg)
         self.assertTrue(result.endswith("accentué"),
                 "Les caractères accentués du message posent problème")
+
+
+    @deferred(timeout=30)
+    def test_is_local(self):
+        """Envoi d'un message sur un hôte local"""
+        # Preparation du message
+        msg = { "type": "nagios",
+                "timestamp": "0",
+                "cmdname": "PROCESS_SERVICE_CHECK_RESULT",
+                "value": "test",
+                "host": "testhost",
+                }
+        self.confdb.is_local.side_effect = lambda x: defer.succeed(True)
+        self.nch.writeToNagios = Mock()
+        # Envoi du message
+        d = self.nch.write(Message(None, None, Content(json.dumps(msg))))
+        def check(r):
+            self.assertTrue(self.nch.writeToNagios.called)
+        d.addCallback(check)
+        return d
+
+
+    @deferred(timeout=30)
+    def test_is_not_local(self):
+        """Ignorer les messages sur un hôte non local"""
+        # Preparation du message
+        msg = { "type": "nagios",
+                "timestamp": "0",
+                "cmdname": "PROCESS_SERVICE_CHECK_RESULT",
+                "value": "test",
+                "host": "testhost",
+                }
+        self.confdb.is_local.side_effect = lambda x: defer.succeed(False)
+        self.nch.writeToNagios = Mock()
+        # Envoi du message
+        d = self.nch.write(Message(None, None, Content(json.dumps(msg))))
+        def check(r):
+            self.assertFalse(self.nch.writeToNagios.called)
+        d.addCallback(check)
+        return d
+
 

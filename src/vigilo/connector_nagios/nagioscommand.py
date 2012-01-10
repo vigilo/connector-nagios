@@ -40,7 +40,7 @@ class NagiosCommandHandler(MessageHandler):
     """
 
 
-    def __init__(self, pipe_filename, accepted_commands, group_size):
+    def __init__(self, pipe_filename, accepted_commands, group_size, confdb):
         """
         Instancie un connecteur XMPP vers pipe.
 
@@ -51,6 +51,7 @@ class NagiosCommandHandler(MessageHandler):
         self.pipe_filename = pipe_filename
         self.accepted_commands = accepted_commands
         self.msg_group_size = group_size
+        self.confdb = confdb
         self._msg_group = []
         self._nagios_group = None
 
@@ -61,6 +62,17 @@ class NagiosCommandHandler(MessageHandler):
 
 
     def processMessage(self, msg):
+        if msg["type"] == "nagios" and "host" in msg:
+            d = self.confdb.is_local(msg["host"])
+        else:
+            d = defer.succeed(True)
+        def check_local(is_local, msg):
+            if is_local:
+                return self._processMessage(msg)
+        d.addCallback(check_local, msg)
+        return d
+
+    def _processMessage(self, msg):
         self._msg_group.append(msg)
         if len(self._msg_group) > self.msg_group_size:
             return self.flushGroup()
@@ -165,7 +177,7 @@ class NagiosCommandHandler(MessageHandler):
             pipe.close()
 
 
-def nagioscmdh_factory(settings, client):
+def nagioscmdh_factory(settings, client, confdb):
     try:
         commands = settings['connector-nagios'].as_list('accepted_commands')
     except KeyError:
@@ -176,7 +188,7 @@ def nagioscmdh_factory(settings, client):
         group_size = settings['connector-nagios'].as_int('group_size')
     except KeyError:
         group_size = 50
-    nch = NagiosCommandHandler(pipe, commands, group_size)
+    nch = NagiosCommandHandler(pipe, commands, group_size, confdb)
     nch.setClient(client)
     subs = parseSubscriptions(settings)
     nch.subscribe(queue, subs)

@@ -44,6 +44,9 @@ listen_unix = @LOCALSTATEDIR@/lib/vigilo/connector-nagios/send.sock
 # Emplacement du pipe utilisé pour envoyer des commandes à Nagios.
 nagios_pipe = @NAGIOSCMDPIPE@
 
+# Fichier de config distribué par VigiConf
+config = @SYSCONFDIR@/vigilo/vigiconf/prod/connector-nagios.db
+
 
 [connector]
 # Emplacement du fichier de sauvegarde local en cas de pannes.
