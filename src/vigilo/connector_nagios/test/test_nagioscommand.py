@@ -38,9 +38,9 @@ class NagiosCommandTestCase(unittest.TestCase):
         open(self.pipe, "w").close() # on crée le fichier
         #os.mkfifo(self.pipe)
         accepted = ["PROCESS_SERVICE_CHECK_RESULT", "PROCESS_HOST_CHECK_RESULT"]
-        self.confdb = Mock()
-        self.confdb.is_local.side_effect = lambda x: defer.succeed(True)
-        self.nch = NagiosCommandHandler(self.pipe, accepted, 0, self.confdb)
+        self.nagiosconf = Mock()
+        self.nagiosconf.has.return_value = True
+        self.nch = NagiosCommandHandler(self.pipe, accepted, 0, self.nagiosconf)
         self.nch.registerProducer(Mock(), True)
 
     def tearDown(self):
@@ -166,7 +166,7 @@ class NagiosCommandTestCase(unittest.TestCase):
                 "value": "test",
                 "host": "testhost",
                 }
-        self.confdb.is_local.side_effect = lambda x: defer.succeed(True)
+        self.nagiosconf.has.return_value = True
         self.nch.writeToNagios = Mock()
         # Envoi du message
         d = self.nch.write(Message(None, None, Content(json.dumps(msg))))
@@ -186,7 +186,7 @@ class NagiosCommandTestCase(unittest.TestCase):
                 "value": "test",
                 "host": "testhost",
                 }
-        self.confdb.is_local.side_effect = lambda x: defer.succeed(False)
+        self.nagiosconf.has.return_value = False
         self.nch.writeToNagios = Mock()
         # Envoi du message
         d = self.nch.write(Message(None, None, Content(json.dumps(msg))))

@@ -7,6 +7,7 @@ include buildenv/Makefile.common
 
 settings.ini: settings.ini.in
 	sed -e 's,@LOCALSTATEDIR@,$(LOCALSTATEDIR),g' \
+		-e 's,@SYSCONFDIR@,$(SYSCONFDIR),g' \
 		-e 's,@NAGIOSCMDPIPE@,$(NAGIOSCMDPIPE),g' $^ > $@
 
 install: build install_python install_data install_permissions

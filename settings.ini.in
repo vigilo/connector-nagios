@@ -47,7 +47,7 @@ listen_unix = @LOCALSTATEDIR@/lib/vigilo/connector-nagios/send.sock
 nagios_pipe = @NAGIOSCMDPIPE@
 
 # Fichier de config distribué par VigiConf
-config = @SYSCONFDIR@/vigilo/vigiconf/prod/connector-nagios.db
+nagios_config = @SYSCONFDIR@/vigilo/vigiconf/prod/nagios/nagios.cfg
 
 
 [connector]
