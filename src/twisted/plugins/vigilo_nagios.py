@@ -25,7 +25,7 @@ class NagiosConnectorServiceMaker(object):
     implements(service.IServiceMaker, IPlugin)
     tapname = "vigilo-nagios"
     description = "Vigilo connector for Nagios"
-    options = base_options.Options
+    options = base_options.make_options('vigilo.connector_nagios')
 
     def makeService(self, options):
         """ the service that wraps everything the connector needs. """
