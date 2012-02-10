@@ -20,9 +20,6 @@ from twisted.internet import defer
 from txamqp.message import Message
 from txamqp.content import Content
 
-from vigilo.common.conf import settings
-settings.load_module(__name__)
-
 from vigilo.connector_nagios.nagioscommand import NagiosCommandHandler
 from vigilo.connector.test.helpers import json
 
