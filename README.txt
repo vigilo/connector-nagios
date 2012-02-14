@@ -2,8 +2,7 @@ Connector Nagios
 ===============
 
 Connector Nagios est le composant de Vigilo_ qui permet à Nagios_ d'envoyer
-les changements d'état et les données de performance collectées sur le bus
-XMPP.
+les changements d'état et les données de performance collectées sur le bus.
 
 Il permet aussi de transférer à Nagios, par l'intermédiaire de son *pipe*, les
 commandes qui auraient été émises sur le bus à son intention.

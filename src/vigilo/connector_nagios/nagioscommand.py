@@ -44,7 +44,7 @@ class NagiosCommandHandler(MessageHandler):
     def __init__(self, pipe_filename, accepted_commands, group_size,
                  nagiosconf):
         """
-        Instancie un connecteur XMPP vers pipe.
+        Instancie un connecteur bus vers pipe.
 
         @param pipe_filename: le nom du fichier pipe de Nagios
         @type  pipe_filename: C{str}
