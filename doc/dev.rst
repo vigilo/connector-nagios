@@ -85,10 +85,10 @@ utilisé comme séparateur de champs (« \| »).
 Exemple d'un changement d'état indiquant un retour à la normale du la charge
 sur 5 minutes (service « Load 05 ») sur le serveur « host1.example.com »::
 
-    event|1290420699|host1.example.com|Load 05|OK|OK: Load at 37%
+    event|1290420699|host1.example.com|Load 05|OK|OK: Load at 0.7
 
 Il est usuel de reprendre le nom de l'état Nagios (ici, « OK ») dans le message
-d'état (dans cet exemple, « OK: Load at 37% »), mais il ne s'agit en rien d'une
+d'état (dans cet exemple, « OK: Load at 0.7 »), mais il ne s'agit en rien d'une
 obligation.
 
 Messages de métrologie
@@ -139,7 +139,7 @@ Exemple d'utilisation de la commande « socat » pour envoyer une alerte sur
 l'état de l'hôte « host1.example.com »::
 
     echo "event|`date +%s`|host1.example.com||DOWN|DOWN: indisponible" \
-        | socat - UNIX-CONNECT:/var/ib/vigilo/connector-nagios/send.sock
+        | socat - UNIX-CONNECT:/var/lib/vigilo/connector-nagios/send.sock
 
 Notez l'utilisation d'une pipe UNIX (« \| ») pour passer le message formaté par
 la commande « echo » à la commande « socat ».
