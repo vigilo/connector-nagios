@@ -14,6 +14,7 @@ import fcntl
 import tempfile
 import time
 import stat
+import shutil
 
 from twisted.internet import threads, defer
 
@@ -56,6 +57,19 @@ class NagiosCommandHandler(MessageHandler):
         self.nagiosconf = nagiosconf
         self._msg_group = []
         self._nagios_group = None
+        self.tmpcmddir = "/dev/shm/vigilo-connector-nagios"
+
+
+    def prepareTempDir(self):
+        assert self._nagios_group is not None
+        if os.path.exists(self.tmpcmddir):
+            return
+        os.mkdir(self.tmpcmddir)
+        os.chown(self.tmpcmddir, -1, self._nagios_group)
+        os.chmod(self.tmpcmddir,
+                 stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR |
+                 stat.S_IRGRP | stat.S_IWGRP | stat.S_IXGRP |
+                 stat.S_IROTH | stat.S_IXOTH) # 775
 
 
     def isConnected(self):
@@ -102,20 +116,15 @@ class NagiosCommandHandler(MessageHandler):
                 return
             if self._nagios_group is None:
                 self._nagios_group = os.stat(self.pipe_filename).st_gid
-            tmpdir = "/dev/shm/vigilo-connector-nagios"
-            if not os.path.exists(tmpdir):
-                os.mkdir(tmpdir)
-                os.chown(tmpdir, -1, self._nagios_group)
-                os.chmod(tmpdir, stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR |
-                                 stat.S_IRGRP | stat.S_IWGRP | stat.S_IXGRP |
-                                 stat.S_IROTH | stat.S_IXOTH) # 775
-            tmpfile, tmpfilename = tempfile.mkstemp(dir=tmpdir)
+            self.prepareTempDir()
+            tmpfile, tmpfilename = tempfile.mkstemp(dir=self.tmpcmddir)
             os.write(tmpfile, "\n".join(commands))
             os.close(tmpfile)
             os.chown(tmpfilename, -1, self._nagios_group)
             os.chmod(tmpfilename, stat.S_IRUSR | stat.S_IWUSR | stat.S_IRGRP)
             msg = "[%d] PROCESS_FILE;%s;1" % (int(time.time()), tmpfilename)
             return msg
+
 
     def convertToNagios(self, data):
         """
@@ -148,6 +157,7 @@ class NagiosCommandHandler(MessageHandler):
             return
         return "[%s] %s;%s" % (cmd_timestamp, cmd_name, cmd_value)
 
+
     def writeToNagios(self, msg):
         # testing there is a pipe (FIFO) which exist.
         if not self.isConnected():
@@ -174,6 +184,7 @@ class NagiosCommandHandler(MessageHandler):
             pipe.close()
 
 
+
 def nagioscmdh_factory(settings, client, nagiosconf):
     try:
         commands = settings['connector-nagios'].as_list('accepted_commands')
@@ -187,6 +198,10 @@ def nagioscmdh_factory(settings, client, nagiosconf):
         group_size = 50
     nch = NagiosCommandHandler(pipe, commands, group_size, nagiosconf)
     nch.setClient(client)
+    try:
+        shutil.rmtree(nch.tmpcmddir)
+    except OSError:
+        pass
     subs = parseSubscriptions(settings)
     nch.subscribe(queue, subs)
     return nch
