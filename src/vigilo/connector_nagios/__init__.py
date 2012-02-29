@@ -52,7 +52,6 @@ def makeService(options):
     socket_listener = socketlistener_factory(socket_filename)
 
     backup_provider = backupprovider_factory(settings, socket_listener)
-    backup_provider.stat_names["queue"] = "queue-from-nagios"
     backup_provider.setServiceParent(root_service)
 
     bus_publisher = buspublisher_factory(settings, client)
@@ -64,6 +63,6 @@ def makeService(options):
     # Statistiques
     from vigilo.connector.status import statuspublisher_factory
     status_publisher = statuspublisher_factory(settings, client,
-            providers=[bus_publisher, backup_provider])
+            providers=[bus_publisher, backup_provider, ncmdh])
 
     return root_service
