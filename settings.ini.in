@@ -72,6 +72,12 @@ backup_table = tobus
 # Par défaut, la section [publications] est utilisée.
 #status_exchange = connectors-status
 
+# La taille maximum de la file d'attente mémoire, à partir de laquelle
+# le jettera les plus vieux messages.
+# Une limite à 50000 correspond à environ 1Go de RAM utilisé.
+# La valeur par défaut est 0, ce qui désactive cette vérification.
+#max_queue_size = 0
+
 
 [publications]
 # Types de messages et le nom de l'exchange à utiliser pour leur publication.
