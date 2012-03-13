@@ -35,9 +35,11 @@ batch_send_perf = 1
 
 
 [connector-nagios]
-# Liste des types de messages XML <command> que le connecteur-nagios
+# Liste des types de commandes que le connecteur-nagios
 # acceptera de transmettre à Nagios, séparés par des virgules.
 # Si la liste est vide, mettre uniquement une virgule.
+# La liste des types de commandes valides est disponible sur :
+# http://www.nagios.org/developerinfo/externalcommands/
 accepted_commands = PROCESS_SERVICE_CHECK_RESULT, PROCESS_HOST_CHECK_RESULT, SCHEDULE_HOST_DOWNTIME, SCHEDULE_SVC_DOWNTIME, SCHEDULE_SVC_CHECK, SCHEDULE_HOST_CHECK, SCHEDULE_HOST_SVC_CHECKS, CHANGE_NORMAL_HOST_CHECK_INTERVAL, CHANGE_NORMAL_SVC_CHECK_INTERVAL, SEND_CUSTOM_HOST_NOTIFICATION, SEND_CUSTOM_SVC_NOTIFICATION
 
 # Emplacement du socket utilisé pour recevoir des messages de Nagios.
