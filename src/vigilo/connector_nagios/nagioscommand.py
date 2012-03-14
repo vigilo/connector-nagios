@@ -78,8 +78,7 @@ class NagiosCommandHandler(MessageHandler):
 
 
     def processMessage(self, msg):
-        if (msg["type"] == "nagios" and "host" in msg
-                and not self.nagiosconf.has(msg["host"])):
+        if "host" in msg and not self.nagiosconf.has(msg["host"]):
             return # pas pour moi
         return self._processMessage(msg)
 
@@ -132,7 +131,7 @@ class NagiosCommandHandler(MessageHandler):
         format attendu par Nagios
         """
         cmd_timestamp = float(data["timestamp"])
-        if data["type"] == "nagios" or data["type"] == "command":
+        if data["type"] == "nagios":
             cmd_name = data["cmdname"]
             cmd_value = unicode(data["value"]).encode("utf-8")
 

@@ -176,20 +176,25 @@ class NagiosCommandTestCase(unittest.TestCase):
     @deferred(timeout=30)
     def test_is_not_local(self):
         """Ignorer les messages sur un hôte non local"""
-        # Preparation du message
-        msg = { "type": "nagios",
-                "timestamp": "0",
-                "cmdname": "PROCESS_SERVICE_CHECK_RESULT",
-                "value": "test",
-                "host": "testhost",
-                }
+        # Preparation des message
+        msg_n = { "type": "nagios",
+                  "timestamp": "0",
+                  "cmdname": "PROCESS_SERVICE_CHECK_RESULT",
+                  "value": "test",
+                  "host": "testhost",
+                  }
+        msg_n = Message(None, None, Content(json.dumps(msg_n)))
+        msg_s = self._make_state_msg(service="test state",
+                                     message=u'test state')
+        msg_s = Message(None, None, Content(json.dumps(msg_s)))
         self.nagiosconf.has.return_value = False
         self.nch.writeToNagios = Mock()
-        # Envoi du message
-        d = self.nch.write(Message(None, None, Content(json.dumps(msg))))
+        # Envoi des message
+        d = self.nch.write(msg_n)
+        d.addCallback(lambda _x: self.nch.write(msg_s))
         def check(r):
-            self.assertFalse(self.nch.writeToNagios.called)
+            print self.nch.writeToNagios.call_args_list
+            self.assertFalse(self.nch.writeToNagios.called,
+                             "Un message à ignorer à été traité")
         d.addCallback(check)
         return d
-
-
