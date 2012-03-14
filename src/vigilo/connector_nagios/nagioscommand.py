@@ -16,7 +16,7 @@ import time
 import stat
 import shutil
 
-from twisted.internet import threads, defer
+from twisted.internet import threads, defer, task
 
 from vigilo.connector.options import parseSubscriptions
 from vigilo.connector.handlers import MessageHandler
@@ -42,22 +42,40 @@ class NagiosCommandHandler(MessageHandler):
     """
 
 
-    def __init__(self, pipe_filename, accepted_commands, group_size,
+    def __init__(self, pipe_filename, accepted_commands, group_writes,
                  nagiosconf):
         """
         Instancie un connecteur bus vers pipe.
 
         @param pipe_filename: le nom du fichier pipe de Nagios
         @type  pipe_filename: C{str}
+        @param accepted_commands: liste des commandes Nagios autorisées
+        @type  accepted_commands: C{list}
+        @param group_writes: groupe les écritures de commandes Nagios dans le
+            pipe, et réalise ces écritures de manière asynchrone
+        @type  group_writes: C{bool}
         """
         super(NagiosCommandHandler, self).__init__()
         self.pipe_filename = pipe_filename
         self.accepted_commands = accepted_commands
-        self.msg_group_size = group_size
+        self.group_writes = group_writes
         self.nagiosconf = nagiosconf
         self._msg_group = []
         self._nagios_group = None
         self.tmpcmddir = "/dev/shm/vigilo-connector-nagios"
+        self.flushGroupTask = task.LoopingCall(self.flushGroup)
+
+
+    def connectionInitialized(self):
+        super(NagiosCommandHandler, self).connectionInitialized()
+        if self.group_writes and not self.flushGroupTask.running:
+            self.flushGroupTask.start(1)
+
+
+    def connectionLost(self, reason):
+        super(NagiosCommandHandler, self).connectionLost(reason)
+        if self.group_writes and self.flushGroupTask.running:
+            self.flushGroupTask.stop()
 
 
     def prepareTempDir(self):
@@ -84,10 +102,10 @@ class NagiosCommandHandler(MessageHandler):
 
     def _processMessage(self, msg):
         self._msg_group.append(msg)
-        if len(self._msg_group) > self.msg_group_size:
-            return self.flushGroup()
-        else:
+        if self.group_writes:
             return defer.succeed(None)
+        else:
+            return self.flushGroup()
 
 
     def flushGroup(self):
@@ -103,7 +121,7 @@ class NagiosCommandHandler(MessageHandler):
             return
         elif len(self._msg_group) == 1:
             # Envoi direct, pas de fichier temporaire
-            return self.convertToNagios(self._msg_group[0])
+            return self.convertToNagios(self._msg_group.pop())
         else:
             commands = []
             while self._msg_group:
@@ -118,6 +136,7 @@ class NagiosCommandHandler(MessageHandler):
             self.prepareTempDir()
             tmpfile, tmpfilename = tempfile.mkstemp(dir=self.tmpcmddir)
             os.write(tmpfile, "\n".join(commands))
+            os.write(tmpfile, '\n')
             os.close(tmpfile)
             os.chown(tmpfilename, -1, self._nagios_group)
             os.chmod(tmpfilename, stat.S_IRUSR | stat.S_IWUSR | stat.S_IRGRP)
@@ -192,10 +211,10 @@ def nagioscmdh_factory(settings, client, nagiosconf):
     pipe = settings['connector-nagios']['nagios_pipe']
     queue = settings["bus"]["queue"]
     try:
-        group_size = settings['connector-nagios'].as_int('group_size')
+        group_nc = settings['connector-nagios'].as_bool('group_nagios_commands')
     except KeyError:
-        group_size = 50
-    nch = NagiosCommandHandler(pipe, commands, group_size, nagiosconf)
+        group_nc = False
+    nch = NagiosCommandHandler(pipe, commands, group_nc, nagiosconf)
     nch.setClient(client)
     try:
         shutil.rmtree(nch.tmpcmddir)

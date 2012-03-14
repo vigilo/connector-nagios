@@ -51,6 +51,15 @@ nagios_pipe = @NAGIOSCMDPIPE@
 # Fichier de config distribué par VigiConf
 nagios_config = @SYSCONFDIR@/vigilo/vigiconf/prod/nagios/nagios.cfg
 
+#-----------------------------------------
+# Réglages pour un grand volume de données
+
+# Groupe les messages à destination de Nagios, et ne les transmet réellement
+# que toutes les secondes, de manière asynchrone. Introduit un délai d'une
+# seconde dans le traitement des messages, mais permet de gérer un plus grand
+# volume de messages.
+#group_nagios_commands = True
+
 
 [connector]
 # Emplacement du fichier de sauvegarde local en cas de pannes.

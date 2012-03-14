@@ -9,6 +9,7 @@ import os
 import tempfile
 import shutil
 import unittest
+import re
 
 # ATTENTION: ne pas utiliser twisted.trial, car nose va ignorer les erreurs
 # produites par ce module !!!
@@ -37,7 +38,7 @@ class NagiosCommandTestCase(unittest.TestCase):
         accepted = ["PROCESS_SERVICE_CHECK_RESULT", "PROCESS_HOST_CHECK_RESULT"]
         self.nagiosconf = Mock()
         self.nagiosconf.has.return_value = True
-        self.nch = NagiosCommandHandler(self.pipe, accepted, 0, self.nagiosconf)
+        self.nch = NagiosCommandHandler(self.pipe, accepted, False, self.nagiosconf)
         self.nch.registerProducer(Mock(), True)
 
     def tearDown(self):
@@ -197,4 +198,44 @@ class NagiosCommandTestCase(unittest.TestCase):
             self.assertFalse(self.nch.writeToNagios.called,
                              "Un message à ignorer à été traité")
         d.addCallback(check)
+        return d
+
+
+    @deferred(timeout=30)
+    def test_message_group(self):
+        """Envoi d'un groupe de messages à Nagios"""
+        # Preparation des messages
+        msgs = []
+        for i in range(10):
+            msgs.append({ "type": "nagios",
+                          "timestamp": "0",
+                          "cmdname": "PROCESS_SERVICE_CHECK_RESULT",
+                          "value": "test %d" % i,
+                          })
+        self.nch.group_writes = True
+        # Désactivation de la vérification du FIFO
+        setattr(self.nch, "isConnected", lambda: True)
+        # Envoi des message
+        for msg in msgs:
+            self.nch.write(Message(None, None, Content(json.dumps(msg))))
+        d = self.nch.flushGroup()
+        def check_result(r):
+            pipe = open(self.pipe, "r")
+            maincmd = pipe.read()
+            pipe.close()
+            print repr(maincmd)
+            maincmd_mo = re.match("\[\d+\] PROCESS_FILE;([^;]+);1\n", maincmd)
+            self.assertTrue(maincmd_mo is not None,
+                            "Le contenu du pipe n'est pas bon")
+            self.assertTrue(os.path.exists(maincmd_mo.group(1)))
+            tmpfile = open(maincmd_mo.group(1), "r")
+            subcmds = tmpfile.read()
+            tmpfile.close()
+            print repr(subcmds)
+            expected = "".join([
+                    "[0.0] PROCESS_SERVICE_CHECK_RESULT;test %d\n" % i
+                    for i in range(10) ])
+            self.assertEqual(subcmds, expected,
+                    "Le contenu du fichier temporaire n'est pas bon")
+        d.addCallback(check_result)
         return d
