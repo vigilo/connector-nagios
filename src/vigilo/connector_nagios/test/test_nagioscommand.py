@@ -14,10 +14,9 @@ import re
 # ATTENTION: ne pas utiliser twisted.trial, car nose va ignorer les erreurs
 # produites par ce module !!!
 #from twisted.trial import unittest
-from nose.twistedtools import reactor, deferred
+from nose.twistedtools import reactor, deferred # pylint:disable-msg=W0611
 
 from mock import Mock
-from twisted.internet import defer
 from txamqp.message import Message
 from txamqp.content import Content
 
@@ -38,7 +37,8 @@ class NagiosCommandTestCase(unittest.TestCase):
         accepted = ["PROCESS_SERVICE_CHECK_RESULT", "PROCESS_HOST_CHECK_RESULT"]
         self.nagiosconf = Mock()
         self.nagiosconf.has.return_value = True
-        self.nch = NagiosCommandHandler(self.pipe, accepted, False, self.nagiosconf)
+        self.nch = NagiosCommandHandler(self.pipe, accepted, False,
+                                        self.nagiosconf)
         self.nch.registerProducer(Mock(), True)
 
     def tearDown(self):
@@ -58,7 +58,7 @@ class NagiosCommandTestCase(unittest.TestCase):
         setattr(self.nch, "isConnected", lambda: True)
         # Envoi du message
         d = self.nch.write(Message(None, None, Content(json.dumps(msg))))
-        def check_result(r):
+        def check_result(_r):
             pipe = open(self.pipe, "r")
             content = pipe.read()
             pipe.close()
@@ -168,7 +168,7 @@ class NagiosCommandTestCase(unittest.TestCase):
         self.nch.writeToNagios = Mock()
         # Envoi du message
         d = self.nch.write(Message(None, None, Content(json.dumps(msg))))
-        def check(r):
+        def check(_r):
             self.assertTrue(self.nch.writeToNagios.called)
         d.addCallback(check)
         return d
@@ -193,7 +193,7 @@ class NagiosCommandTestCase(unittest.TestCase):
         # Envoi des message
         d = self.nch.write(msg_n)
         d.addCallback(lambda _x: self.nch.write(msg_s))
-        def check(r):
+        def check(_r):
             print self.nch.writeToNagios.call_args_list
             self.assertFalse(self.nch.writeToNagios.called,
                              "Un message à ignorer à été traité")
@@ -219,7 +219,7 @@ class NagiosCommandTestCase(unittest.TestCase):
         for msg in msgs:
             self.nch.write(Message(None, None, Content(json.dumps(msg))))
         d = self.nch.flushGroup()
-        def check_result(r):
+        def check_result(_r):
             pipe = open(self.pipe, "r")
             maincmd = pipe.read()
             pipe.close()

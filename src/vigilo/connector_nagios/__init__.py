@@ -32,6 +32,7 @@ def makeService(options):
 
     try:
         socket_filename = settings['connector-nagios']['listen_unix']
+        # Statement seems to have no effect # pylint: disable-msg=W0104
         settings['connector-nagios']['nagios_pipe']
         settings["bus"]["queue"]
     except KeyError, e:
@@ -62,7 +63,7 @@ def makeService(options):
 
     # Statistiques
     from vigilo.connector.status import statuspublisher_factory
-    status_publisher = statuspublisher_factory(settings, client,
+    statuspublisher_factory(settings, client,
             providers=[bus_publisher, backup_provider, ncmdh])
 
     return root_service

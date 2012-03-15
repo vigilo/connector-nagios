@@ -12,8 +12,6 @@ from __future__ import with_statement
 
 import re
 
-from twisted.internet import defer
-
 from vigilo.connector.conffile import ConfFile
 
 

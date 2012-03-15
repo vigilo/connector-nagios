@@ -13,10 +13,9 @@ import stat
 import fcntl
 import tempfile
 import time
-import stat
 import shutil
 
-from twisted.internet import threads, defer, task
+from twisted.internet import threads, task, defer
 
 from vigilo.connector.options import parseSubscriptions
 from vigilo.connector.handlers import MessageHandler
@@ -79,6 +78,10 @@ class NagiosCommandHandler(MessageHandler):
 
 
     def prepareTempDir(self):
+        """
+        Prépare un répertoire temporaire où écrire les fichiers à destination
+        de Nagios. Règle aussi les droits pour que Nagios puisse y accéder.
+        """
         assert self._nagios_group is not None
         if os.path.exists(self.tmpcmddir):
             return
@@ -91,6 +94,10 @@ class NagiosCommandHandler(MessageHandler):
 
 
     def isConnected(self):
+        """
+        Teste la disponibilité du pipe de Nagios
+        @rtype: C{boolean}
+        """
         return (os.path.exists(self.pipe_filename) and
                 stat.S_ISFIFO(os.stat(self.pipe_filename).st_mode))
 
@@ -109,6 +116,7 @@ class NagiosCommandHandler(MessageHandler):
 
 
     def flushGroup(self):
+        """Traite les messages en attente à destination de Nagios"""
         msg = self.convertGroupToNagios()
         if msg is None:
             return None
@@ -117,6 +125,14 @@ class NagiosCommandHandler(MessageHandler):
 
 
     def convertGroupToNagios(self):
+        """
+        Convertit les messages en attente en une commande à destination de
+        Nagios. S'il y a plusieurs messages en attente, les messages Nagios
+        correspondants sont écrits dans un fichier temporaire, et la commande
+        retournée à destination de Nagios est un C{PROCESS_FILE}.
+
+        @rtype: C{str}
+        """
         if len(self._msg_group) == 0:
             return
         elif len(self._msg_group) == 1:
@@ -177,11 +193,18 @@ class NagiosCommandHandler(MessageHandler):
 
 
     def writeToNagios(self, msg):
+        """
+        Écrit dans le pipe de Nagios. Cette fonction est bloquante, elle doit
+        être exécutée dans un thread.
+
+        @param msg: commande Nagios
+        @type  msg: C{str}
+        """
         # testing there is a pipe (FIFO) which exist.
         if not self.isConnected():
             raise WrongNagiosPipe()
-        # XXX il serait possible d'aggréger les écritures si on flush
-        #  après chaque écriture (pour ne pas ouvrir/fermer le pipe à
+        # il serait possible d'aggréger les écritures si on flush
+        # après chaque écriture (pour ne pas ouvrir/fermer le pipe à
         # chaque fois
         # (texte suivant issue du code de nsca)
 # /* if we don't fflush() then we're writing in 4k non-CR-terminated blocks, and
