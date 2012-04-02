@@ -20,8 +20,8 @@ from mock import Mock
 from txamqp.message import Message
 from txamqp.content import Content
 
+from vigilo.connector import json
 from vigilo.connector_nagios.nagioscommand import NagiosCommandHandler
-from vigilo.connector.test.helpers import json
 
 
 
@@ -39,7 +39,7 @@ class NagiosCommandTestCase(unittest.TestCase):
         self.nagiosconf.has.return_value = True
         self.nch = NagiosCommandHandler(self.pipe, accepted, False,
                                         self.nagiosconf)
-        self.nch.registerProducer(Mock(), True)
+        self.nch.registerProducer(Mock(), False)
 
     def tearDown(self):
         shutil.rmtree(self.tmpdir)
