@@ -3,7 +3,7 @@ USER := vigilo-nagios
 
 all: build settings.ini
 
-include buildenv/Makefile.common
+include buildenv/Makefile.common.python
 
 settings.ini: settings.ini.in
 	sed -e 's,@LOCALSTATEDIR@,$(LOCALSTATEDIR),g' \
