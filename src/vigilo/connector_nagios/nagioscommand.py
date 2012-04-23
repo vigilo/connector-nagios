@@ -168,7 +168,7 @@ class NagiosCommandHandler(MessageHandler):
         cmd_timestamp = float(data["timestamp"])
         if data["type"] == "nagios":
             cmd_name = data["cmdname"]
-            cmd_value = unicode(data["value"]).encode("utf-8")
+            cmd_value = data["value"]
 
         elif data["type"] == "state":
             if "service" in data and data["service"]:
@@ -177,7 +177,6 @@ class NagiosCommandHandler(MessageHandler):
             else:
                 cmd_name = 'PROCESS_HOST_CHECK_RESULT'
                 cmd_value = u"%(host)s;%(code)s;%(message)s" % data
-            cmd_value = cmd_value.encode("utf-8")
         else:
             return
 
@@ -189,7 +188,8 @@ class NagiosCommandHandler(MessageHandler):
                             'accepted': self.accepted_commands,
                          })
             return
-        return "[%s] %s;%s" % (cmd_timestamp, cmd_name, cmd_value)
+        res = u"[%s] %s;%s" % (cmd_timestamp, cmd_name, cmd_value)
+        return res.encode('utf-8')
 
 
     def writeToNagios(self, msg):

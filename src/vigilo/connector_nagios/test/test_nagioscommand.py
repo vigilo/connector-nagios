@@ -74,13 +74,30 @@ class NagiosCommandTestCase(unittest.TestCase):
         Conversion d'un message de commande en syntaxe Nagios
         """
         msg = { "type": "nagios",
-                "timestamp": "0",
+                "timestamp": 0,
                 "cmdname": "PROCESS_SERVICE_CHECK_RESULT",
                 "value": "test",
                 }
         result = self.nch.convertToNagios(msg)
         self.assertEqual(result, "[0.0] PROCESS_SERVICE_CHECK_RESULT;test",
-                         "La conversion en commande Nagios n'est pas bonne")
+             "La conversion en commande Nagios n'est pas bonne")
+
+
+    def test_convertToNagios_nagios_unicode(self):
+        """
+        Conversion d'un message de commande Unicode en syntaxe Nagios
+        """
+        msg = { "type": u"nagios",
+                "timestamp": 0,
+                "cmdname": u"PROCESS_SERVICE_CHECK_RESULT",
+                "value": u"test éçà",
+                }
+        result = self.nch.convertToNagios(msg)
+        self.assertEqual(result,
+            # Les octets exprimés en hexadécimal correspondent à la suite
+            # de séquences UTF-8 pour les caractères "é", "ç" et "à".
+            "[0.0] PROCESS_SERVICE_CHECK_RESULT;test \xC3\xA9\xC3\xA7\xC3\xA0",
+             "La conversion en commande Nagios n'est pas bonne")
 
 
     def _make_state_msg(self, service='', code='1', message='Test message'):
