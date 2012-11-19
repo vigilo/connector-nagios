@@ -46,6 +46,7 @@ make install_pkg \
 %pre
 %_pre_useradd vigilo-nagios %{_localstatedir}/lib/vigilo/%{module} /bin/false
 %_pre_groupadd nagios vigilo-nagios
+%_pre_groupadd vigilo-nagios nagios
 
 %post
 %_post_service %{name}
@@ -77,11 +78,13 @@ rm -rf $RPM_BUILD_ROOT
 %config(noreplace) %{_sysconfdir}/sysconfig/*
 %{python_sitelib}/vigilo*
 %{python_sitelib}/twisted*
-%dir %{_localstatedir}/lib/vigilo
-%attr(-,vigilo-nagios,vigilo-nagios) %{_localstatedir}/lib/vigilo/%{module}
 %dir %{_localstatedir}/log/vigilo
 %attr(-,vigilo-nagios,vigilo-nagios) %{_localstatedir}/log/vigilo/%{module}
 %attr(-,vigilo-nagios,vigilo-nagios) %{_localstatedir}/run/%{name}
+%dir %{_localstatedir}/lib/vigilo
+# Permissions strictes pour éviter un problème de sécurité (cf. #1093).
+%defattr(644,vigilo-nagios,vigilo-nagios,750)
+%{_localstatedir}/lib/vigilo/%{module}
 
 
 %changelog

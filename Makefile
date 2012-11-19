@@ -33,10 +33,13 @@ install_permissions:
 	-/usr/sbin/useradd -s /sbin/nologin -M -g $(USER) -G nagios \
 		-d $(LOCALSTATEDIR)/lib/vigilo/$(NAME) \
 		-c 'Vigilo $(NAME) user' $(USER)
+	@echo "Adding nagios to $(USER) group..."
+	-/usr/sbin/usermod -a -G $(USER) nagios
 	chown $(USER):$(USER) \
 			$(DESTDIR)$(LOCALSTATEDIR)/lib/vigilo/$(NAME) \
 			$(DESTDIR)$(LOCALSTATEDIR)/log/vigilo/$(NAME) \
 			$(DESTDIR)$(LOCALSTATEDIR)/run/$(PKGNAME)
+	chmod 750 $(DESTDIR)$(LOCALSTATEDIR)/lib/vigilo/$(NAME)
 	chown root:$(USER) $(DESTDIR)$(SYSCONFDIR)/vigilo/$(NAME)/settings.ini
 	chmod 640 $(DESTDIR)$(SYSCONFDIR)/vigilo/$(NAME)/settings.ini
 
