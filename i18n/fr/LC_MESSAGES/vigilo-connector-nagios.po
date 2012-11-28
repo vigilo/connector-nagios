@@ -32,7 +32,7 @@ msgstr "Répertoire introuvable : '%(dir)s'"
 #: src/twisted/plugins/vigilo_nagios.py:76
 #, python-format
 msgid "Wrong permissions on directory: '%(dir)s'"
-msgstr "Permissions indorrectes sur le répertoire '%(dir)s')"
+msgstr "Permissions incorrectes sur le répertoire '%(dir)s'"
 
 #: src/twisted/plugins/vigilo_nagios.py:87
 #, python-format
