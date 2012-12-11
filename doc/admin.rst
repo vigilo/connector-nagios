@@ -12,7 +12,7 @@ Afin de pouvoir faire fonctionner le connecteur Nagios, l'installation
 préalable des logiciels suivants est requise :
 
 * python (>= 2.5), sur la machine où le connecteur est installé
-* ejabberd (>= 2.1), éventuellement sur une machine distante
+* rabbitmq (>= 2.7.1), éventuellement sur une machine distante
 * nagios (>= 3.1.0) sur la machine où le connecteur est installé
 
 
