@@ -233,6 +233,7 @@ def nagioscmdh_factory(settings, client, nagiosconf):
         commands = []
     pipe = settings['connector-nagios']['nagios_pipe']
     queue = settings["bus"]["queue"]
+    queue_messages_ttl = int(settings['bus'].get('queue_messages_ttl', 0))
     try:
         group_nc = settings['connector-nagios'].as_bool('group_nagios_commands')
     except KeyError:
@@ -244,5 +245,5 @@ def nagioscmdh_factory(settings, client, nagiosconf):
     except OSError:
         pass
     subs = parseSubscriptions(settings)
-    nch.subscribe(queue, subs)
+    nch.subscribe(queue, queue_messages_ttl, subs)
     return nch
