@@ -89,9 +89,10 @@ backup_table = tobus
 # configuré dans VigiConf.
 #status_service = vigilo-connector-nagios
 
-# L'exchange à utiliser pour les messages d'état du connecteur.
-# Par défaut, la section [publications] est utilisée.
-#status_exchange = connectors-status
+# Ces paramètres permettent de surcharger les valeurs présentes dans la
+# section [publications] pour les messages d'auto-supervision du connecteur.
+#self_monitoring_nagios_exchange = nagios
+#self_monitoring_perf_exchange = perf
 
 # La taille maximum de la file d'attente mémoire, à partir de laquelle
 # le jettera les plus vieux messages.
