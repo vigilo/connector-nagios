@@ -1,7 +1,7 @@
 Document: vigilo-connector-nagios-manual
 Title: Vigilo connector-nagios manual
 Author: Vigilo Team
-Abstract: The vigilo-connector-nagions paquage provides
+Abstract: The vigilo-connector-nagios package provides
  a connector that links together Vigilo and Nagios.
 Section: Text
 
