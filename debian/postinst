@@ -23,10 +23,10 @@ case "$1" in
         MODULE=connector-nagios
         PKGNAME=vigilo-$MODULE
 
-        USER_HOME=/var/lib/vigilo/$MODULE
         USER=vigilo-nagios
         USER_NAME="Vigilo $PKGNAME user"
         USER_GROUP=$USER
+        USER_HOME=/var/lib/vigilo/$MODULE
         NAGIOS_GROUP=nagios
 
         # 1. create group if not existing
@@ -37,7 +37,7 @@ case "$1" in
         fi
 
         # 2. create homedir if not existing
-        test -d $USER_HOME || mkdir $USER_HOME
+        test -d $USER_HOME || mkdir -p $USER_HOME
 
         # 3. create user if not existing
         if ! getent passwd | grep -q "^$USER:"; then
@@ -62,13 +62,14 @@ case "$1" in
             add user $USER $NAGIOS_GROUP
         fi
 
+        chown $USER:$USER_GROUP $USER_HOME
+        chown root:$USER_GROUP /etc/vigilo/$MODULE/settings.ini
+        chmod 640 /etc/vigilo/$MODULE/settings.ini
+
         chown $USER:$USER_GROUP \
-            $USER_HOME \
             /var/log/vigilo/$MODULE \
             /var/run/$PKGNAME
 
-        chown root:$USER /etc/vigilo/$MODULE/settings.ini
-        chmod 640 /etc/vigilo/$MODULE/settings.ini
 
         twistd --help > /dev/null 2>&1
     ;;
