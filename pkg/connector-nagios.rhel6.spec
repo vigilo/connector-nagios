@@ -45,8 +45,6 @@ make install_pkg \
     SYSCONFDIR=%{_sysconfdir} \
     LOCALSTATEDIR=%{_localstatedir} \
     PYTHON=%{__python}
-mkdir -p $RPM_BUILD_ROOT/%{_tmpfilesdir}
-install -m 644 pkg/%{name}.conf $RPM_BUILD_ROOT/%{_tmpfilesdir}
 
 %find_lang %{name}
 
@@ -60,7 +58,6 @@ exit 0
 %post
 /sbin/chkconfig --add %{name} || :
 %{_libexecdir}/twisted-dropin-cache > /dev/null 2>&1 || :
-%tmpfiles_create %{_tmpfilesdir}/%{name}.conf
 
 %preun
 if [ $1 = 0 ]; then
@@ -91,16 +88,14 @@ rm -rf $RPM_BUILD_ROOT
 %{python_sitelib}/twisted*
 %dir %{_localstatedir}/log/vigilo
 %attr(-,vigilo-nagios,vigilo-nagios) %{_localstatedir}/log/vigilo/%{module}
+%attr(-,vigilo-nagios,vigilo-nagios) %{_localstatedir}/run/%{name}
 %dir %{_localstatedir}/lib/vigilo
 # Permissions strictes pour éviter un problème de sécurité (cf. #1093).
 %defattr(644,vigilo-nagios,vigilo-nagios,750)
 %{_localstatedir}/lib/vigilo/%{module}
-%attr(644,root,root) %{_tmpfilesdir}/%{name}.conf
+
 
 %changelog
-* Thu Mar 16 2017 Yves Ouattara <yves.ouattara@c-s.fr>
-- Rebuild for RHEL7.
-
 * Fri Jan 21 2011 Vincent Quéméner <vincent.quemener@c-s.fr>
 - Rebuild for RHEL6.
 
