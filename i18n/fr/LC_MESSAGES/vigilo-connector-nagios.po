@@ -1,12 +1,12 @@
 # French translations for PACKAGE package.
 # Copyright (C) 2010 THE PACKAGE'S COPYRIGHT HOLDER
 # This file is distributed under the same license as the PACKAGE package.
-# Vigilo language team <contact@projet-vigilo.org>, 2010.
+# Vigilo language team <contact.vigilo@c-s.fr>, 2010.
 #
 msgid ""
 msgstr ""
 "Project-Id-Version:  vigilo.connector-nagios\n"
-"Report-Msgid-Bugs-To: contact@projet-vigilo.org\n"
+"Report-Msgid-Bugs-To: contact.vigilo@c-s.fr\n"
 "POT-Creation-Date: 2010-02-19 11:00+0100\n"
 "PO-Revision-Date: 2011-05-06 15:39+0200\n"
 "Last-Translator: Automatically generated\n"
