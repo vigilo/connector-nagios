@@ -35,7 +35,7 @@ def makeService(options):
         # Statement seems to have no effect # pylint: disable-msg=W0104
         settings['connector-nagios']['nagios_pipe']
         settings["bus"]["queue"]
-    except KeyError, e:
+    except KeyError as e:
         LOGGER.error(_("Missing configuration option: %s"), str(e))
         sys.exit(1)
 

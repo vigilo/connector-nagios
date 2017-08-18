@@ -5,6 +5,7 @@
 """
 Teste l'envoi du bus vers le pipe Nagios
 """
+from __future__ import print_function
 import os
 import tempfile
 import shutil
@@ -62,7 +63,7 @@ class NagiosCommandTestCase(unittest.TestCase):
             pipe = open(self.pipe, "r")
             content = pipe.read()
             pipe.close()
-            print repr(content)
+            print(repr(content))
             self.assertEqual(content, "[0.0] PROCESS_SERVICE_CHECK_RESULT;"
                     "test\n", "Le contenu du pipe n'est pas bon")
         d.addCallback(check_result)
@@ -211,7 +212,7 @@ class NagiosCommandTestCase(unittest.TestCase):
         d = self.nch.write(msg_n)
         d.addCallback(lambda _x: self.nch.write(msg_s))
         def check(_r):
-            print self.nch.writeToNagios.call_args_list
+            print(self.nch.writeToNagios.call_args_list)
             self.assertFalse(self.nch.writeToNagios.called,
                              "Un message à ignorer à été traité")
         d.addCallback(check)
@@ -240,7 +241,7 @@ class NagiosCommandTestCase(unittest.TestCase):
             pipe = open(self.pipe, "r")
             maincmd = pipe.read()
             pipe.close()
-            print repr(maincmd)
+            print(repr(maincmd))
             maincmd_mo = re.match("\[\d+\] PROCESS_FILE;([^;]+);1\n", maincmd)
             self.assertTrue(maincmd_mo is not None,
                             "Le contenu du pipe n'est pas bon")
@@ -248,7 +249,7 @@ class NagiosCommandTestCase(unittest.TestCase):
             tmpfile = open(maincmd_mo.group(1), "r")
             subcmds = tmpfile.read()
             tmpfile.close()
-            print repr(subcmds)
+            print(repr(subcmds))
             expected = "".join([
                     "[0.0] PROCESS_SERVICE_CHECK_RESULT;test %d\n" % i
                     for i in range(10) ])

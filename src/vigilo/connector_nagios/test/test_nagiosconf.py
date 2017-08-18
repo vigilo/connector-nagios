@@ -6,6 +6,7 @@
 Teste la lecture des hôtes depuis la conf Nagios
 """
 
+from __future__ import print_function
 import os
 import tempfile
 import unittest
@@ -61,7 +62,7 @@ define host{
 }
 """)
         self.tmpfile.close()
-        print self.tmppath
+        print(self.tmppath)
         n = NagiosConfFile(self.tmppath)
         n.reload()
         self.assertEqual(n.hosts, set(["Test Host Avec Espaces"]))
