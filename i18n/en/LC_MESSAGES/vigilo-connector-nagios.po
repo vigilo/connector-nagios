@@ -1,16 +1,16 @@
 # English translations for vigilo-connector-nagios.
-# Copyright (C) 2011 ORGANIZATION
+# Copyright (C) 2017 ORGANIZATION
 # This file is distributed under the same license as the
 # vigilo-connector-nagios
 # project.
-# FIRST AUTHOR <EMAIL@ADDRESS>, 2011.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2017.
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: vigilo-connector-nagios 2.0.0\n"
+"Project-Id-Version: vigilo-connector-nagios 4.1.0rc2\n"
 "Report-Msgid-Bugs-To: contact.vigilo@c-s.fr\n"
-"POT-Creation-Date: 2011-05-06 15:39+0200\n"
-"PO-Revision-Date: 2011-05-06 15:39+0200\n"
+"POT-Creation-Date: 2017-08-24 12:15+0200\n"
+"PO-Revision-Date: 2017-08-24 12:15+0200\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: en <LL@li.org>\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
@@ -19,38 +19,16 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 0.9.4\n"
 
-#: src/twisted/plugins/vigilo_nagios.py:54
+#: src/vigilo/connector_nagios/__init__.py:39
 #, python-format
 msgid "Missing configuration option: %s"
 msgstr "Missing configuration option: %s"
 
-#: src/twisted/plugins/vigilo_nagios.py:59
-#: src/twisted/plugins/vigilo_nagios.py:71
-#, python-format
-msgid "Directory not found: '%(dir)s'"
-msgstr "Directory not found: '%(dir)s'"
-
-#: src/twisted/plugins/vigilo_nagios.py:64
-#: src/twisted/plugins/vigilo_nagios.py:76
-#, python-format
-msgid "Wrong permissions on directory: '%(dir)s'"
-msgstr "Wrong permissions on directory: '%(dir)s'"
-
-#: src/twisted/plugins/vigilo_nagios.py:87
-#, python-format
-msgid "Can't write to the Nagios command pipe: '%s'"
-msgstr "Can't write to the Nagios command pipe: '%s'"
-
-#: src/twisted/plugins/vigilo_nagios.py:91
-#, python-format
-msgid "Can't traverse directory: '%(dir)s'"
-msgstr "Can't traverse directory: '%(dir)s'"
-
-#: src/vigilo/connector_nagios/xmpptopipefw.py:29
+#: src/vigilo/connector_nagios/nagioscommand.py:33
 msgid "the configured nagios command pipe is not a FIFO"
 msgstr "the configured nagios command pipe is not a FIFO"
 
-#: src/vigilo/connector_nagios/xmpptopipefw.py:97
+#: src/vigilo/connector_nagios/nagioscommand.py:185
 #, python-format
 msgid ""
 "Command '%(received)s' disallowed by policy, accepted commands: "
