@@ -78,6 +78,12 @@ backup_file = @LOCALSTATEDIR@/lib/vigilo/connector-nagios/backup.sqlite
 # Nom de la table qui stocke les messages en attente à destination du bus.
 backup_table = tobus
 
+# La taille maximum de la file d'attente mémoire, à partir de laquelle
+# le connecteur jettera les messages les plus vieux.
+# Une limite à 50000 correspond à environ 1Go de RAM utilisé.
+# La valeur par défaut est 0, ce qui désactive cette vérification.
+#max_queue_size = 0
+
 # Nom d'hôte utilisé pour signaler à Vigilo que ce connecteur fonctionne
 # correctement. Cela doit correspondre au nom d'hôte configuré dans VigiConf
 # pour cette machine. Par défaut, on utilise le nom d'hôte court (sans le
@@ -93,12 +99,6 @@ backup_table = tobus
 # section [publications] pour les messages d'auto-supervision du connecteur.
 #self_monitoring_nagios_exchange = nagios
 #self_monitoring_perf_exchange = perf
-
-# La taille maximum de la file d'attente mémoire, à partir de laquelle
-# le jettera les plus vieux messages.
-# Une limite à 50000 correspond à environ 1Go de RAM utilisé.
-# La valeur par défaut est 0, ce qui désactive cette vérification.
-#max_queue_size = 0
 
 
 [publications]
