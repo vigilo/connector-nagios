@@ -18,7 +18,7 @@ import shutil
 from twisted.internet import threads, task, defer
 
 from vigilo.connector.options import parseSubscriptions
-from vigilo.connector.handlers import MessageHandler
+from vigilo.connector.handlers import MessageHandler, QueueSubscriber
 
 from vigilo.common.logging import get_logger
 LOGGER = get_logger(__name__)
@@ -234,6 +234,7 @@ def nagioscmdh_factory(settings, client, nagiosconf):
     pipe = settings['connector-nagios']['nagios_pipe']
     queue = settings["bus"]["queue"]
     queue_messages_ttl = int(settings['bus'].get('queue_messages_ttl', 0))
+    prefetch_count = int(settings['bus'].get('prefetch_count', QueueSubscriber.prefetch_count))
     try:
         group_nc = settings['connector-nagios'].as_bool('group_nagios_commands')
     except KeyError:
@@ -245,5 +246,5 @@ def nagioscmdh_factory(settings, client, nagiosconf):
     except OSError:
         pass
     subs = parseSubscriptions(settings)
-    nch.subscribe(queue, queue_messages_ttl, subs)
+    nch.subscribe(queue, queue_messages_ttl, subs, prefetch_count=prefetch_count)
     return nch
