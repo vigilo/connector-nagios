@@ -41,8 +41,13 @@ def makeService(options):
 
     root_service = service.MultiService()
 
-    client = client_factory(settings)
-    client.setServiceParent(root_service)
+    client_in = client_factory(settings)
+    client_in.setName("vigilo_client_in")
+    client_in.setServiceParent(root_service)
+
+    client_out = client_factory(settings)
+    client_out.setName("vigilo_client_out")
+    client_out.setServiceParent(root_service)
 
     # Configuration
     nagiosconf = nagiosconffile_factory(settings)
@@ -55,15 +60,15 @@ def makeService(options):
     backup_provider = backupprovider_factory(settings, socket_listener)
     backup_provider.setServiceParent(root_service)
 
-    bus_publisher = buspublisher_factory(settings, client)
+    bus_publisher = buspublisher_factory(settings, client_out)
     bus_publisher.registerProducer(backup_provider, True)
 
     # Du bus vers Nagios
-    ncmdh = nagioscmdh_factory(settings, client, nagiosconf)
+    ncmdh = nagioscmdh_factory(settings, client_in, nagiosconf)
 
     # Statistiques
     from vigilo.connector.status import statuspublisher_factory
-    statuspublisher_factory(settings, client,
+    statuspublisher_factory(settings, client_out,
             providers=[bus_publisher, backup_provider, ncmdh])
 
     return root_service
