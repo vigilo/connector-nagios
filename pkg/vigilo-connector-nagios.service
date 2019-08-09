@@ -14,5 +14,5 @@ WantedBy=multi-user.target
 Type=simple
 EnvironmentFile=-/etc/sysconfig/vigilo-connector-nagios
 User=vigilo-nagios
-ExecStart=/usr/bin/vigilo-connector-nagios -d /var/lib/vigilo/connector-nagios --pidfile '' -n vigilo-nagios
+ExecStart=/usr/bin/vigilo-connector-nagios -d /var/lib/vigilo/connector-nagios --pidfile '' -l /dev/null -n vigilo-nagios
 Restart=on-failure
