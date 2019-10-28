@@ -20,18 +20,11 @@ from twisted.internet import threads, task, defer
 from vigilo.connector.options import parseSubscriptions
 from vigilo.connector.handlers import MessageHandler, QueueSubscriber
 
-from vigilo.common.logging import get_logger
+from vigilo.common.logging import get_logger, get_error_message
 LOGGER = get_logger(__name__)
 
 from vigilo.common.gettext import translate
 _ = translate(__name__)
-
-
-
-class WrongNagiosPipe(Exception):
-    def __str__(self):
-        return _('the configured nagios command pipe is not a FIFO')
-
 
 
 class NagiosCommandHandler(MessageHandler):
@@ -39,7 +32,8 @@ class NagiosCommandHandler(MessageHandler):
     Transfère les messages pour Nagios du bus à son I{pipe} de commandes
     externes.
     """
-
+    # Délai entre 2 tentatives de connexion au pipe de commandes Nagios
+    _pipeDelay = 5.
 
     def __init__(self, pipe_filename, accepted_commands, group_writes,
                  nagiosconf):
@@ -63,18 +57,24 @@ class NagiosCommandHandler(MessageHandler):
         self._nagios_group = None
         self.tmpcmddir = "/dev/shm/vigilo-connector-nagios"
         self.flushGroupTask = task.LoopingCall(self.flushGroup)
+        self.pipeTask = task.LoopingCall(self._connectToNagios)
+        self._pipe = None
+
+        # On attend d'être connectés au bus avant d'essayer d'envoyer
+        # des messages à Nagios.
+        self.pauseProducing()
 
 
     def connectionInitialized(self):
         super(NagiosCommandHandler, self).connectionInitialized()
-        if self.group_writes and not self.flushGroupTask.running:
-            self.flushGroupTask.start(1)
+        # Connexion à Nagios une fois connecté au bus.
+        if not self.pipeTask.running:
+            self.pipeTask.start(self._pipeDelay)
 
 
     def connectionLost(self, reason):
         super(NagiosCommandHandler, self).connectionLost(reason)
-        if self.group_writes and self.flushGroupTask.running:
-            self.flushGroupTask.stop()
+        self._disconnectFromNagios()
 
 
     def prepareTempDir(self):
@@ -98,8 +98,53 @@ class NagiosCommandHandler(MessageHandler):
         Teste la disponibilité du pipe de Nagios
         @rtype: C{boolean}
         """
-        return (os.path.exists(self.pipe_filename) and
-                stat.S_ISFIFO(os.stat(self.pipe_filename).st_mode))
+        return self._pipe is not None
+
+
+    def _disconnectFromNagios(self):
+        self.pauseProducing()
+        if self.group_writes and self.flushGroupTask.running:
+            self.flushGroupTask.stop()
+
+        if self._pipe is not None:
+            try:
+                # Fermer self._pipe ferme aussi le descripteur de fichier
+                # sous-jacent.
+                self._pipe.close()
+            except:
+                pass
+            finally:
+                self._pipe = None
+
+
+    def _connectToNagios(self):
+        LOGGER.info(_("Connecting to Nagios through '%s'"), self.pipe_filename)
+        if not (os.path.exists(self.pipe_filename) and
+            stat.S_ISFIFO(os.stat(self.pipe_filename).st_mode)):
+            return
+
+        try:
+            # Lorsqu'on ouvre un pipe en écriture seule en mode non-bloquant,
+            # une erreur ENXIO est retournée si le pipe n'est pas connecté.
+            fd = os.open(self.pipe_filename, os.O_WRONLY | os.O_NONBLOCK)
+        except OSError as e:
+            LOGGER.debug("Error: %s" % get_error_message(e))
+            return
+
+        try:
+            self._pipe = os.fdopen(fd, 'w')
+        except OSError as e:
+            LOGGER.debug("Error: %(msg)s (fd=%(fd)r)" % {
+                'msg': get_error_message(e), 'fd': fd})
+            os.close(fd)
+            return
+
+        if self.group_writes and not self.flushGroupTask.running:
+            self.flushGroupTask.start(1)
+        self.resumeProducing()
+        self.pipeTask.stop()
+        LOGGER.info(_("Successfully connected to Nagios through '%s'"),
+                      self.pipe_filename)
 
 
     def processMessage(self, msg):
@@ -200,29 +245,32 @@ class NagiosCommandHandler(MessageHandler):
         @param msg: commande Nagios
         @type  msg: C{str}
         """
-        # testing there is a pipe (FIFO) which exist.
         if not self.isConnected():
-            raise WrongNagiosPipe()
-        # il serait possible d'aggréger les écritures si on flush
-        # après chaque écriture (pour ne pas ouvrir/fermer le pipe à
-        # chaque fois
-        # (texte suivant issue du code de nsca)
-# /* if we don't fflush() then we're writing in 4k non-CR-terminated blocks, and
-#  * anything else (eg. pscwatch) which writes to the file will be writing into
-#  * the middle of our commands.
-#  */
+            raise RuntimeError(_("Not connected to Nagios yet!"))
+
         LOGGER.debug("Writing to %(pipe)s: %(msg)s", {
             'pipe': self.pipe_filename,
             'msg': msg,
         })
-        # cannot open in append mode, since that causes a seek
-        pipe = open(self.pipe_filename, "w")
-        fcntl.flock(pipe.fileno(), fcntl.LOCK_EX)
+
         try:
-            pipe.write(msg + '\n')
-        finally:
-            fcntl.flock(pipe.fileno(), fcntl.LOCK_UN)
-            pipe.close()
+            # Le lock + flush permet d'éviter que les données d'un autre
+            # processus ne soit entrelacées avec les nôtres.
+            fcntl.flock(self._pipe, fcntl.LOCK_EX)
+            try:
+                self._pipe.write(msg + '\n')
+                self._pipe.flush()
+            finally:
+                fcntl.flock(self._pipe, fcntl.LOCK_UN)
+        except Exception as e:
+            # En général, cela signifie que la connexion est perdue.
+            # On force une reconnexion.
+            self._disconnectFromNagios()
+            if not self.pipeTask.running:
+                self.pipeTask.start(self._pipeDelay)
+            raise RuntimeError(
+                _("The connection to Nagios was lost (%s), reconnecting...") %
+                get_error_message(e))
 
 
 
