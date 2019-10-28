@@ -29,20 +29,27 @@ from vigilo.connector_nagios.nagioscommand import NagiosCommandHandler
 class NagiosCommandTestCase(unittest.TestCase):
     """Teste la sauvegarde locale de messages en cas d'erreur."""
 
+    # Taille des blocs pour la lecture depuis le pipe Nagios
+    _IO_SIZE = 4096
 
     def setUp(self):
         self.tmpdir = tempfile.mkdtemp(prefix="test-connector-nagios-")
-        self.pipe = os.path.join(self.tmpdir, "pipe")
-        open(self.pipe, "w").close() # on crée le fichier
-        #os.mkfifo(self.pipe)
+        self.pipe_name = os.path.join(self.tmpdir, "pipe")
+        os.mkfifo(self.pipe_name)
         accepted = ["PROCESS_SERVICE_CHECK_RESULT", "PROCESS_HOST_CHECK_RESULT"]
         self.nagiosconf = Mock()
         self.nagiosconf.has.return_value = True
-        self.nch = NagiosCommandHandler(self.pipe, accepted, False,
+        self.nch = NagiosCommandHandler(self.pipe_name, accepted, False,
                                         self.nagiosconf)
         self.nch.registerProducer(Mock(), False)
 
+        # On prépare le pipe pour la lecture
+        # et on demande à NagiosCommandHandler de s'y connecter.
+        self.pipe = os.open(self.pipe_name, os.O_RDONLY | os.O_NONBLOCK)
+        self.nch.pipeTask.start(1)
+
     def tearDown(self):
+        os.close(self.pipe)
         shutil.rmtree(self.tmpdir)
 
 
@@ -55,14 +62,11 @@ class NagiosCommandTestCase(unittest.TestCase):
                 "cmdname": "PROCESS_SERVICE_CHECK_RESULT",
                 "value": "test",
                 }
-        # Désactivation de la vérification du FIFO
-        setattr(self.nch, "isConnected", lambda: True)
+
         # Envoi du message
         d = self.nch.write(Message(None, None, Content(json.dumps(msg))))
         def check_result(_r):
-            pipe = open(self.pipe, "r")
-            content = pipe.read()
-            pipe.close()
+            content = os.read(self.pipe, self._IO_SIZE)
             print(repr(content))
             self.assertEqual(content, "[0.0] PROCESS_SERVICE_CHECK_RESULT;"
                     "test\n", "Le contenu du pipe n'est pas bon")
@@ -230,17 +234,14 @@ class NagiosCommandTestCase(unittest.TestCase):
                           "cmdname": "PROCESS_SERVICE_CHECK_RESULT",
                           "value": "test %d" % i,
                           })
+
+        # Envoi des messages
         self.nch.group_writes = True
-        # Désactivation de la vérification du FIFO
-        setattr(self.nch, "isConnected", lambda: True)
-        # Envoi des message
         for msg in msgs:
             self.nch.write(Message(None, None, Content(json.dumps(msg))))
         d = self.nch.flushGroup()
         def check_result(_r):
-            pipe = open(self.pipe, "r")
-            maincmd = pipe.read()
-            pipe.close()
+            maincmd = os.read(self.pipe, self._IO_SIZE)
             print(repr(maincmd))
             maincmd_mo = re.match("\[\d+\] PROCESS_FILE;([^;]+);1\n", maincmd)
             self.assertTrue(maincmd_mo is not None,
