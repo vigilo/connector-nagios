@@ -75,7 +75,7 @@ nagios_config = @SYSCONFDIR@/vigilo/vigiconf/prod/nagios/nagios.cfg
 # que toutes les secondes, de manière asynchrone. Introduit un délai d'une
 # seconde dans le traitement des messages, mais permet de gérer un plus grand
 # volume de messages.
-#group_nagios_commands = True
+#group_nagios_commands = False
 
 
 [connector]
