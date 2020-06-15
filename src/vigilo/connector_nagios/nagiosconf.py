@@ -29,12 +29,14 @@ class NagiosConfFile(ConfFile):
 
 
     def _read_conf(self):
+        hosts = set()
         with open(self.path) as conffile:
             content = conffile.read()
             # attention, ça peut être long. deferToThread ?
             for host in self.regexp.findall(content):
                 if host:
-                    self.hosts.add(host)
+                    hosts.add(host)
+        self.hosts = hosts
 
 
     def has(self, hostname):
