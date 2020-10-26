@@ -1,5 +1,5 @@
 Connector Nagios
-===============
+================
 
 Connector Nagios est le composant de Vigilo_ qui permet à Nagios_ d'envoyer
 les changements d'état et les données de performance collectées sur le bus.
@@ -13,23 +13,19 @@ Pour les détails du fonctionnement du Connector Nagios, se reporter à la
 
 Dépendances
 -----------
-Vigilo nécessite une version de Python supérieure ou égale à 2.5. Le chemin de
-l'exécutable python peut être passé en paramètre du ``make install`` de la
-façon suivante::
-
-    make install PYTHON=/usr/bin/python2.6
+Vigilo nécessite une version de Python supérieure ou égale à 2.7.
 
 Le Connector Nagios a besoin de Nagios_ et des modules Python suivants :
 
-- setuptools (ou distribute)
+- setuptools
 - vigilo-common
 - vigilo-connector
 
 
 Installation
 ------------
-L'installation se fait par la commande ``make install`` (à exécuter en
-``root``).
+L'installation se fait par la commande ``python setup.py install``
+(depuis le compte ``root``).
 
 
 License

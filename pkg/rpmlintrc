@@ -1,6 +1,0 @@
-# -*- python -*-
-
-from Config import addFilter
-
-# Durcissement du dossier contenant la socket de communication
-addFilter("E: non-standard-dir-perm /var/lib/vigilo/connector-nagios 0750L")

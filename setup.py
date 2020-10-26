@@ -6,8 +6,16 @@
 import os, sys
 from setuptools import setup
 
-sysconfdir = os.getenv("SYSCONFDIR", "/etc")
-localstatedir = os.getenv("LOCALSTATEDIR", "/var")
+cmdclass = {}
+try:
+    from vigilo.common.commands import install_data
+except ImportError:
+    pass
+else:
+    cmdclass['install_data'] = install_data
+
+os.environ.setdefault('SYSCONFDIR', '/etc')
+os.environ.setdefault('LOCALSTATEDIR', '/var')
 
 tests_require = [
     'coverage',
@@ -69,13 +77,13 @@ setup(name='vigilo-connector-nagios',
                 'vigilo-connector-nagios = twisted.scripts.twistd:run',
                 ],
         },
+        test_suite='nose.collector',
         package_dir={'': 'src'},
+        cmdclass=cmdclass,
         data_files=[
-                    (os.path.join(sysconfdir, "vigilo/connector-nagios"),
-                        ["settings.ini"]),
-                    (os.path.join(localstatedir, "lib/vigilo/connector-nagios"), []),
-                    (os.path.join(localstatedir, "log/vigilo/connector-nagios"), []),
-                    (os.path.join(localstatedir, "run/vigilo-connector-nagios"), []),
-                   ] + install_i18n("i18n", os.path.join(sys.prefix, 'share', 'locale')),
+            (os.path.join("@SYSCONFDIR@", "vigilo", "connector-nagios"), ["settings.ini.in"]),
+            (os.path.join("@LOCALSTATEDIR@", "lib", "vigilo", "connector-nagios"), []),
+            (os.path.join("@LOCALSTATEDIR@", "log", "vigilo", "connector-nagios"), []),
+           ] + install_i18n("i18n", os.path.join(sys.prefix, 'share', 'locale')),
         )
 
