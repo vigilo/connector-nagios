@@ -6,16 +6,7 @@
 import os, sys
 from setuptools import setup
 
-cmdclass = {}
-try:
-    from vigilo.common.commands import install_data
-except ImportError:
-    pass
-else:
-    cmdclass['install_data'] = install_data
-
-os.environ.setdefault('SYSCONFDIR', '/etc')
-os.environ.setdefault('LOCALSTATEDIR', '/var')
+setup_requires = ['vigilo-common'] if not os.environ.get('CI') else []
 
 tests_require = [
     'coverage',
@@ -49,6 +40,7 @@ setup(name='vigilo-connector-nagios',
         long_description="Gateway from Nagios to the Vigilo message "
                          "bus and back to Nagios.",
         zip_safe=False, # pour pouvoir écrire le dropin.cache de twisted
+        setup_requires=setup_requires,
         install_requires=[
             'setuptools',
             'vigilo-common',
@@ -79,11 +71,24 @@ setup(name='vigilo-connector-nagios',
         },
         test_suite='nose.collector',
         package_dir={'': 'src'},
-        cmdclass=cmdclass,
+        vigilo_build_vars={
+            'nagioscmdpipe': {
+                'default': '/dev/shm/nagios/cmd/nagios.cmd',
+                'description': "path to Nagios' external command pipe",
+            },
+            'sysconfdir': {
+                'default': '/etc',
+                'description': "installation directory for configuration files",
+            },
+            'localstatedir': {
+                'default': '/var',
+                'description': "local state directory",
+            },
+        },
         data_files=[
-            (os.path.join("@SYSCONFDIR@", "vigilo", "connector-nagios"), ["settings.ini.in"]),
-            (os.path.join("@LOCALSTATEDIR@", "lib", "vigilo", "connector-nagios"), []),
-            (os.path.join("@LOCALSTATEDIR@", "log", "vigilo", "connector-nagios"), []),
+            (os.path.join("@sysconfdir@", "vigilo", "connector-nagios"), ["settings.ini.in"]),
+            (os.path.join("@localstatedir@", "lib", "vigilo", "connector-nagios"), []),
+            (os.path.join("@localstatedir@", "log", "vigilo", "connector-nagios"), []),
            ] + install_i18n("i18n", os.path.join(sys.prefix, 'share', 'locale')),
         )
 

@@ -60,13 +60,13 @@ batch_send_perf = 1
 accepted_commands = PROCESS_SERVICE_CHECK_RESULT, PROCESS_HOST_CHECK_RESULT, SCHEDULE_HOST_DOWNTIME, SCHEDULE_SVC_DOWNTIME, SCHEDULE_SVC_CHECK, SCHEDULE_HOST_CHECK, SCHEDULE_HOST_SVC_CHECKS, CHANGE_NORMAL_HOST_CHECK_INTERVAL, CHANGE_NORMAL_SVC_CHECK_INTERVAL, SEND_CUSTOM_HOST_NOTIFICATION, SEND_CUSTOM_SVC_NOTIFICATION
 
 # Emplacement du socket utilisé pour recevoir des messages de Nagios.
-listen_unix = @LOCALSTATEDIR@/lib/vigilo/connector-nagios/send.sock
+listen_unix = @localstatedir@/lib/vigilo/connector-nagios/send.sock
 
 # Emplacement du pipe utilisé pour envoyer des commandes à Nagios.
-nagios_pipe = @NAGIOSCMDPIPE@
+nagios_pipe = @nagioscmdpipe@
 
 # Fichier de config distribué par VigiConf
-nagios_config = @SYSCONFDIR@/vigilo/vigiconf/prod/nagios/nagios.cfg
+nagios_config = @sysconfdir@/vigilo/vigiconf/prod/nagios/nagios.cfg
 
 #-----------------------------------------
 # Réglages pour un grand volume de données
@@ -80,7 +80,7 @@ nagios_config = @SYSCONFDIR@/vigilo/vigiconf/prod/nagios/nagios.cfg
 
 [connector]
 # Emplacement du fichier de sauvegarde local en cas de pannes.
-backup_file = @LOCALSTATEDIR@/lib/vigilo/connector-nagios/backup.sqlite
+backup_file = @localstatedir@/lib/vigilo/connector-nagios/backup.sqlite
 
 # Nom de la table qui stocke les messages en attente à destination du bus.
 backup_table = tobus
@@ -156,7 +156,7 @@ args = '/dev/log', 'daemon'
 [handler_errors]
 level = ERROR
 class = handlers.RotatingFileHandler
-args = ('@LOCALSTATEDIR@/log/vigilo/connector-nagios/error.log', 'a', 1024*1024*10, 5)
+args = ('@localstatedir@/log/vigilo/connector-nagios/error.log', 'a', 1024*1024*10, 5)
 formatter = errorFormatter
 
 [formatter_consoleFormatter]
