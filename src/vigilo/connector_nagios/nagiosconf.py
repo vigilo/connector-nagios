@@ -25,7 +25,7 @@ class NagiosConfFile(ConfFile):
     def __init__(self, path):
         super(NagiosConfFile, self).__init__(path)
         self.hosts = set()
-        self.regexp = re.compile("^\s*host_name\s+(.*?)\s*$", re.MULTILINE)
+        self.regexp = re.compile(r"^\s*host_name\s+([^#]+?)\s*(#.*)?$", re.MULTILINE)
 
 
     def _read_conf(self):
@@ -33,9 +33,8 @@ class NagiosConfFile(ConfFile):
         with open(self.path) as conffile:
             content = conffile.read()
             # attention, ça peut être long. deferToThread ?
-            for host in self.regexp.findall(content):
-                if host:
-                    hosts.add(host)
+            for host, comment_ in self.regexp.findall(content):
+                hosts.add(host)
         self.hosts = hosts
 
 
